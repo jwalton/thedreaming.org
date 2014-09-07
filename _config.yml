@@ -1,0 +1,24 @@
+# Site settings
+title: thedreaming.org
+email: web@lucid.thedreaming.org
+description: > # this means to ignore newlines until "baseurl:"
+  Random musings from Jason Walton, software developer and sometimes photograper.
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "http://www.thedreaming.org" # the base hostname & protocol for your site
+twitter_username: JasonCWalton
+github_username:  jwalton
+
+paginate: 5
+permalink: pretty
+
+excerpt_separator: "<!--more-->"
+
+# Build settings
+markdown: kramdown
+defaults:
+  -
+    scope:
+      path: ""
+      type: "post"
+    values:
+      author: "Jason Walton"
