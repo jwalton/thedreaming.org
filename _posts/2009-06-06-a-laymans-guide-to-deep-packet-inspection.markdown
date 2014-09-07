@@ -3,7 +3,6 @@ layout: post
 status: publish
 published: true
 title: A Layman's Guide to Deep Packet Inspection
-author: Jason Walton
 excerpt: "<h2>What is Deep Packet Inspection?</h2>\r\n\r\nSuppose you send a postcard
   to someone.  On the left hand side of the post card, you write your return address,
   you write the address you want the card to be delivered to, and hopefully you remember

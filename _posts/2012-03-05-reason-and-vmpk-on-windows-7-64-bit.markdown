@@ -3,7 +3,6 @@ layout: post
 status: publish
 published: true
 title: Reason and VMPK on Windows 7 64-bit
-author: Jason Walton
 excerpt: "A friend of mine wanted to get Reason up and running on his laptop, so he
   could mix up some mad beats on an airplane.  It's a bit tough to lug a MIDI keyboard
   about on the plane with you, though.  You might learn to play a more <a href=\"http://usa.yamaha.com/products/music-production/midi-controllers/wx5/?mode=model\">compact

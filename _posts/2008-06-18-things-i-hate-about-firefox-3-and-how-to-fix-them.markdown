@@ -3,7 +3,6 @@ layout: post
 status: publish
 published: true
 title: Things I Hate about Firefox 3, and How to Fix Them
-author: Jason Walton
 excerpt: "<p>Firefox 3 is here!  While there's a lot to like about the new Firefox,
   there's plenty of things to dislike, too.  This is a quick run down of the things
   that bother me the most, and how to fix them.</p>\r\n\r\n"

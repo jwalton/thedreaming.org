@@ -3,7 +3,6 @@ layout: post
 status: publish
 published: true
 title: Internationalization in Java
-author: Jason Walton
 excerpt: "This is a quick tutorial on how to make it easy to support multiple languages
   in your Java programs.\r\n\r\n"
 wordpress_id: 9

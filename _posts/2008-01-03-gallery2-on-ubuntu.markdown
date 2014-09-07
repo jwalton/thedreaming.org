@@ -3,7 +3,6 @@ layout: post
 status: publish
 published: true
 title: Gallery2 on Ubuntu 7.10
-author: Jason Walton
 excerpt: "<p><a href=\"http://codex.gallery2.org/Gallery2:Download\">Gallery 2</a>
   is a popular web based photo album application.  This details how to install Gallery2
   on Ubuntu 7.10 (Gutsy Gibbon).  These instructions assume you have installed Apache2,

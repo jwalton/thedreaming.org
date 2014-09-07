@@ -3,7 +3,6 @@ layout: post
 status: publish
 published: true
 title: G1 Garbage Collector
-author: Jason Walton
 wordpress_id: 13
 wordpress_url: http://www.thedreaming.org/2011/01/14/g1-garbage-collector/
 date: '2011-01-14 15:34:58 -0500'

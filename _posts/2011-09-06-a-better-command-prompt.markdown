@@ -3,7 +3,6 @@ layout: post
 status: publish
 published: true
 title: A Better Command Prompt
-author: Jason Walton
 excerpt: "If you've spent much time doing development work on Linux or Max OS X, and
   you suddenly find yourself stuck doing development work on a Windows machine, one
   of the things you'll quickly learn to hate is the Windows command prompt.  You can't

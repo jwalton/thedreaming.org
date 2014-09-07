@@ -3,7 +3,6 @@ layout: post
 status: publish
 published: true
 title: Python Library for Bind9/named Configuration
-author: Jason Walton
 wordpress_id: 12
 wordpress_url: http://www.thedreaming.org/2011/01/13/bind9named-configuration-with-python/
 date: '2011-01-13 21:54:52 -0500'
