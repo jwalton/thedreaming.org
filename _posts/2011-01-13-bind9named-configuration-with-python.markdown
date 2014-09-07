@@ -4,10 +4,6 @@ status: publish
 published: true
 title: Python Library for Bind9/named Configuration
 author: Jason Walton
-excerpt: "I had to spend some time this week generating a Bind9 configuration file
-  from a database.  I decided to learn Python at the same time.  :)  This is a quick
-  <a href=\"http://www.thedreaming.org/content/bind9Tools/Bind9Tools.py\">Python module</a>
-  that will let you build Bind9 config files in no time flat:\r\n\r\n"
 wordpress_id: 12
 wordpress_url: http://www.thedreaming.org/2011/01/13/bind9named-configuration-with-python/
 date: '2011-01-13 21:54:52 -0500'
@@ -25,10 +21,11 @@ tags:
 - library
 comments: []
 ---
-<p>I had to spend some time this week generating a Bind9 configuration file from a database.  I decided to learn Python at the same time.  :)  This is a quick <a href="http://www.thedreaming.org/content/bind9Tools/Bind9Tools.py">Python module</a> that will let you build Bind9 config files in no time flat:</p>
-<p><a id="more"></a><a id="more-12"></a></p>
-<div class="code">
-<pre>
+I had to spend some time this week generating a Bind9 configuration file from a database.  I decided to learn Python at the same time.  :)  This is a quick [Python module]({{ site.baseurl }}/files/Bind9Tools.py) that will let you build Bind9 config files in no time flat:
+
+<!--more-->
+
+{% highlight python %}
 import Bind9Tools
 hosts = [
     Bind9Tools.Host("thedreaming.org.",
@@ -54,6 +51,6 @@ zoneFile.close()
 zoneFile = open('db.f.e.8.0.0.0.0.0.0.0.0.0.0.0.0.0', 'w')
 zone.writeReverseIPv6ZoneFile(sys.stdout, "f.e.8.0.0.0.0.0.0.0.0.0.0.0.0.0.")
 zoneFile.close()
-</pre>
-</div>
-<p>If you find this useful, or have suggestions for improvements, drop me a line in the comments!</p>
+{% endhighlight %}
+
+If you find this useful, or have suggestions for improvements, drop me a line in the comments!
