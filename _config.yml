@@ -25,3 +25,4 @@ defaults:
       type: "posts"
     values:
       author: "Jason Walton"
+      layout: "post"
