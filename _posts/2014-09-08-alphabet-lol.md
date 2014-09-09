@@ -1,10 +1,10 @@
 ---
-title: Alphabet League of Legends
+title: Alphabet League of Legends Challenge
 tags:
 - LoL
 date: '2014-09-08 23:00:00'
 ---
-We've been playing a series of [League of Legends](http://na.leagueoflegends.com/) games where each game, every champion we pick must contain a given letter of the alphabet (so for the "A" game, every champion picked needs to have an "A" in the name.)
+We've been playing a series of [League of Legends](http://na.leagueoflegends.com/) games where each game, every champion we pick must contain a given letter of the alphabet (so for the "A" game, every champion picked needs to have an "A" in the name, then for the next game every champion needs to have a "B", and so on.)
 
 <!--more-->
 
