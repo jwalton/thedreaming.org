@@ -11,8 +11,6 @@ wordpress_id: 7
 wordpress_url: http://www.thedreaming.org/2008/01/03/gallery2-on-ubuntu/
 date: '2008-01-03 14:33:01 -0500'
 date_gmt: '2008-01-03 19:33:01 -0500'
-categories:
-- Uncategorized
 tags:
 - Ubuntu
 - Gallery

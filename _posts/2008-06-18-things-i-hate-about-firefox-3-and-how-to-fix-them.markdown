@@ -10,8 +10,6 @@ wordpress_id: 10
 wordpress_url: http://www.thedreaming.org/2008/06/18/things-i-hate-about-firefox-3-and-how-to-fix-them/
 date: '2008-06-18 05:12:04 -0400'
 date_gmt: '2008-06-18 10:12:04 -0400'
-categories:
-- Firefox
 tags:
 - Firefox
 - Bookmarks

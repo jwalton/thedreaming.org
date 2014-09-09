@@ -18,8 +18,6 @@ wordpress_id: 14
 wordpress_url: http://www.thedreaming.org/2011/09/06/a-better-command-prompt/
 date: '2011-09-06 17:28:24 -0400'
 date_gmt: '2011-09-06 22:28:24 -0400'
-categories:
-- Uncategorized
 tags:
 - Software
 - DOS

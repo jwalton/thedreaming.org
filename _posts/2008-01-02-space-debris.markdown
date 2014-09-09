@@ -7,8 +7,6 @@ wordpress_id: 6
 wordpress_url: http://www.thedreaming.org/2008/01/02/space-debris/
 date: '2008-01-02 11:51:59 -0500'
 date_gmt: '2008-01-02 16:51:59 -0500'
-categories:
-- Software
 tags:
 - Java
 - Game

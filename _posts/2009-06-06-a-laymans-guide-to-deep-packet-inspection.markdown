@@ -41,8 +41,6 @@ wordpress_id: 11
 wordpress_url: http://www.thedreaming.org/2009/06/06/a-laymans-guide-to-deep-packet-inspection/
 date: '2009-06-06 09:39:52 -0400'
 date_gmt: '2009-06-06 14:39:52 -0400'
-categories:
-- Software
 tags:
 - DPI
 - Deep Packet Inspection

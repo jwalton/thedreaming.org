@@ -7,8 +7,6 @@ wordpress_id: 16
 wordpress_url: http://www.thedreaming.org/2012/08/21/creating-an-spf-record/
 date: '2012-08-21 16:58:21 -0400'
 date_gmt: '2012-08-21 21:58:21 -0400'
-categories:
-- DNS
 tags:
 - DNS
 - SPF

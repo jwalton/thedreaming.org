@@ -5,10 +5,10 @@ published: true
 title: Converting iTunes Playlists to m3u Files with XSLT
 wordpress_id: 5
 wordpress_url: http://www.thedreaming.org/2007/12/12/converting-itunes-playlists-to-m3u-files-with-xslt/
+redirect_from:
+  - /2007/12/12/converting-itunes-playlists-to-m3u-files-with-xslt/
 date: '2007-12-12 11:45:05 -0500'
 date_gmt: '2007-12-12 16:45:05 -0500'
-categories:
-- Software
 tags:
 - xslt
 - iTunes

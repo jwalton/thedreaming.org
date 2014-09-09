@@ -7,10 +7,6 @@ wordpress_id: 12
 wordpress_url: http://www.thedreaming.org/2011/01/13/bind9named-configuration-with-python/
 date: '2011-01-13 21:54:52 -0500'
 date_gmt: '2011-01-14 02:54:52 -0500'
-categories:
-- Software
-- Python
-- DNS
 tags:
 - bind9
 - bind

@@ -11,8 +11,6 @@ wordpress_id: 15
 wordpress_url: http://www.thedreaming.org/2012/03/05/reason-and-vmpk-on-windows-7-64-bit/
 date: '2012-03-05 21:15:13 -0500'
 date_gmt: '2012-03-06 02:15:13 -0500'
-categories:
-- Uncategorized
 tags:
 - Reason
 - MIDI

@@ -7,9 +7,6 @@ wordpress_id: 13
 wordpress_url: http://www.thedreaming.org/2011/01/14/g1-garbage-collector/
 date: '2011-01-14 15:34:58 -0500'
 date_gmt: '2011-01-14 20:34:58 -0500'
-categories:
-- Software
-- Java
 tags:
 - Java
 - GC

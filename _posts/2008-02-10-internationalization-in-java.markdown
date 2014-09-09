@@ -9,9 +9,6 @@ wordpress_id: 9
 wordpress_url: http://www.thedreaming.org/2008/02/10/internationalization-in-java/
 date: '2008-02-10 17:19:56 -0500'
 date_gmt: '2008-02-10 22:19:56 -0500'
-categories:
-- Software
-- Java
 tags:
 - Java
 - Internationalization
