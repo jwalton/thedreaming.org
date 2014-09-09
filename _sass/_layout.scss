@@ -169,9 +169,18 @@
     }
 }
 
+.post-list-header {
+    margin-bottom: $spacing-unit;
+
+    h2 {
+        margin-bottom: 0;
+    }
+}
+
+
 .post-meta {
     font-size: $small-font-size;
-    color: $grey-color;
+    margin-right: 1em;
 }
 
 .post-link {
