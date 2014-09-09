@@ -26,7 +26,7 @@ This is a quick record of how we've been doing so far (will be updated as we go.
 * L - [09/08 - Loss](http://matchhistory.na.leagueoflegends.com/en/#match-details/NA1/1533122741)
 * M - [09/08 - Loss](http://matchhistory.na.leagueoflegends.com/en/#match-details/NA1/1533202510)
 
-<div style="width: 40%; min-width: 200px; height: 200px; margin: auto; text-align: center">
+<div style="width: 40%; min-width: 200px; margin: auto; text-align: center">
     <svg id="d3WinLossChart"></svg>
     ("Losses" does not include games that we lost, then replayed and won.)
 </div>
@@ -45,7 +45,7 @@ This is a quick record of how we've been doing so far (will be updated as we go.
 
         var parent = document.getElementById('d3WinLossChart').parentElement;
         var width = parent.clientWidth;
-        var height = parent.clientHeight;
+        var height = 200;
         var svg = d3.select("#d3WinLossChart")
             .datum(data)
 
