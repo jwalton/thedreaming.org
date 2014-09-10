@@ -8,6 +8,8 @@ We've been playing a series of [League of Legends](http://na.leagueoflegends.com
 
 <!--more-->
 
+Some letters are more difficult than others.  "B" for example, has only six champions to select from.  "P" has only five.  We've started using Team Builder so we can be sure we won't get banned. :smile:  "Q" will be impossible, an "Quinn" is the only champion available (unless Riot brings back One for All.)
+
 This is a quick record of how we've been doing so far (will be updated as we go.)
 
 <noscript>
