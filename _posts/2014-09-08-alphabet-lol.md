@@ -92,7 +92,7 @@ This is a quick record of how we've been doing so far (will be updated as we go.
         {letter: "C", date: "2014/08/25", win: true,  gameId: "1509102997"},
         {letter: "D", date: "2014/08/27", win: false, gameId: "1511401723"},
         {letter: "E", date: "2014/08/27", win: false, gameId: "1511452643"},
-        {letter: "E", date: "2014/08/29", win: true,  gameId: "1514152049", notes: "With Dream Godling"},
+        {letter: "E", date: "2014/08/29", win: true,  gameId: "1514152049", notes: "Missing usual player"},
         {letter: "F", date: "2014/08/29", win: true,  gameId: "1521284882", notes: "With disconnects"},
         {letter: "G", date: "2014/09/02", win: false, gameId: "1521284882"},
         {letter: "H", date: "2014/09/04", win: false, gameId: "1525473140"},
