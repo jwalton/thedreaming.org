@@ -110,7 +110,7 @@ This is a quick record of how we've been doing so far (will be updated as we go.
     // Draw a box for a game.
     var renderGame = function(game) {
         var gameClass = game.win ? "lol-win" : "lol-loss";
-        var gameIcon = game.win ? "fa-times-circle" : "fa-times-circle";
+        var gameIcon = game.win ? "fa-check-circle" : "fa-times-circle";
         var title = game.win ? "Victory" : "Defeat";
         var extras = game.date + (game.notes ? (" • "  + game.notes) : "")
 
