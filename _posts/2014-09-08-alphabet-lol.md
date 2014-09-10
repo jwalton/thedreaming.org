@@ -14,69 +14,61 @@ This is a quick record of how we've been doing so far (will be updated as we go.
     Javascript is required for visualizations.
 </noscript>
 <style>
-
-.lol-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-@media (min-width: 768px) {
-    #lol-list {
-        display: flex;
-        justify-content: space-around;
+    .lol-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
     }
-}
 
-.lol-list li {
-    -webkit-transition: opacity 1s ease-in-out;
-    -moz-transition: opacity 1s ease-in-out;
-    -ms-transition: opacity 1s ease-in-out;
-    -o-transition: opacity 1s ease-in-out;
-    transition: opacity 1s ease-in-out;
-    opacity: 1;
-    padding-bottom: 0.25em;
-}
+    .lol-list li {
+        display: flex;
+        align-items: center;
+    }
 
-.lol-list li.invisible {
-    opacity: 0;
-}
+    @media (min-width: 768px) {
+        #lol-list {
+            display: flex;
+            justify-content: space-around;
+        }
+    }
 
-.lol-list .letter {
-    display: inline-block;
-    font-size: 2em;
-    width: 30px;
-}
+    .lol-list .letter {
+        flex: 0 0 30px;
+        display: inline-block;
+        font-size: 1.25em;
+        width: 30px;
+    }
 
-.lol-game {
-    min-width: 100px;
-    border-radius: 5px;
-    display: inline-block;
-    padding: 10px;
-    margin-right: 5px;
-}
+    .lol-game {
+        min-width: 150px;
+        border-radius: 5px;
+        display: inline-block;
+        padding: 10px;
+        margin: 2px 5px 3px 0px;
+    }
 
-.lol-win, a.lol-win:visited, a.lol-win:hover, a.lol-win:link, a.lol-win:active {
-    background-color: #015AAD;
-    color: #f5d99e;
-}
+    .lol-win, a.lol-win:visited, a.lol-win:hover, a.lol-win:link, a.lol-win:active {
+        background-color: #015AAD;
+        color: #f5d99e;
+    }
 
-.lol-loss, a.lol-loss:visited, a.lol-loss:hover, a.lol-loss:link, a.lol-loss:active{
-    background-color: #680006;
-    color: #EEE;
-}
+    .lol-loss, a.lol-loss:visited, a.lol-loss:hover, a.lol-loss:link, a.lol-loss:active{
+        background-color: #680006;
+        color: #EEE;
+    }
 
-.lol-game .status-icon {
-    font-size: 2em;
-    padding-right: 10px;
-}
-.lol-game .content {
-    float: right;
-}
+    .lol-game .status-icon {
+        padding-right: 10px;
+    }
+    .lol-game .title {
+        padding-right: 10px;
+    }
+    .lol-game .content {
+    }
 
-.lol-game .lol-extras {
-    font-size: .75em;
-}
+    .lol-game .lol-extras {
+        font-size: .75em;
+    }
 </style>
 
 <div id="lol-list">
@@ -115,57 +107,66 @@ This is a quick record of how we've been doing so far (will be updated as we go.
         return "http://matchhistory.na.leagueoflegends.com/en/#match-details/NA1/" + game.gameId;
     };
 
+    // Draw a box for a game.
+    var renderGame = function(game) {
+        var gameClass = game.win ? "lol-win" : "lol-loss";
+        var gameIcon = game.win ? "fa-times-circle" : "fa-times-circle";
+        var title = game.win ? "Victory" : "Defeat";
+        var extras = game.date + (game.notes ? (" • "  + game.notes) : "")
+
+        return '<a href="' + getMatchHistoryUrl(game) + '" class="lol-game ' + gameClass + '">' +
+            '<span class="status-icon"><i class="fa ' + gameIcon + '"></i></span>' +
+            '<span class="content"><span class="title">' + title + '</span>' +
+            '<span class="lol-extras">' + extras + '</span></span></a>'
+    }
+
     // Build the table of games by letter.
-    var gamesByLetter = _(games).groupBy('letter').toArray().value();
+    var i = 0;
+    var gamesByLetter = _(games)
+        .groupBy('letter')
+        .map(function(gamesForLetter) {
+            return _.extend(gamesForLetter, {letterIndex: i++});
+        })
+        .value();
 
     var lolListEl = d3.select('#lol-list');
 
+    // Render the list of games for a given letter.
     var makeGameListForLetter = function(games) {
         var g = d3.select(this);
-        g.append('td')
+        g.append('span')
             .classed({letter: true})
             .text( games[0].letter );
-        wrapper = g.append('td')
-        wrapper.selectAll('a.lol-game')
+        wrapper = g.append('span')
+        wrapper.selectAll('span')
             .data(games)
             .enter()
-            .append('a')
-            .attr({
-                href: getMatchHistoryUrl
-            })
-            .classed({
-                "lol-game": true,
-                "lol-win": function(v) {return v.win;},
-                "lol-loss": function(v) {return !v.win;}
-            })
+            .append('span')
             .each( function(v) {
                 var g = d3.select(this);
-                content = g.append('span').classed({content: true});
-                content.append('div').text(v.win ? 'Victory' : 'Defeat');
-                content.append('div')
-                    .classed({"lol-extras": true})
-                    .text(v.date + (v.notes ? " • " + v.notes : ""));
-                g.append('span')
-                    .classed({"status-icon": true})
-                    .html(v.win?"<i class='fa fa-check-circle'></i>":"<i class='fa fa-times-circle'></i>")
+                g.html(renderGame(v));
             });
     }
 
     var drawGamesTable = function (gamesByLetter) {
-        var containerEl = lolListEl.append('table').classed({'lol-list': true});
+        var containerEl = lolListEl.append('ul').classed({'lol-list': true});
 
-        containerEl.selectAll('tr')
+        containerEl.selectAll('li')
             .data(gamesByLetter, function(games) {return games[0].letter;})
             .enter()
-            .append('tr')
-            .classed({invisible: true})
+            .append('li')
+            .style({opacity: 0})
             .each(makeGameListForLetter)
             .transition()
-            .delay(function(v,i) {return i * 100;})
+            .delay(function(v,i) {
+                return v.letterIndex * 50;
+            })
+            .duration(1000)
+            .style({opacity:1})
             .attr({'class': true});
     }
 
-    mid = Math.floor(gamesByLetter.length/2);
+    mid = Math.ceil(gamesByLetter.length/2);
     firstHalf = gamesByLetter.slice(0,mid);
     lastHalf = gamesByLetter.slice(mid,gamesByLetter.length);
     drawGamesTable(firstHalf);
