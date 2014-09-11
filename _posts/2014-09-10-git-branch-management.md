@@ -27,7 +27,7 @@ Deleting merged branches is a pretty safe thing to do.  This rather lengthy seri
     # Get the latest state from the origin
     git fetch --all
 
-    # Prune branches that exist in your repo but no longer exist on origin
+    # Prune branches that exist in refs/remotes but no longer exist on origin
     git remote prune origin
 
     # Find all merged remote branches and make a note of them
