@@ -103,6 +103,7 @@ This is a quick record of how we've been doing so far (will be updated as we go.
         {letter: "M", date: "2014/09/08", win: false, gameId: "1533202510"},
         {letter: "N", date: "2014/09/09", win: true,  gameId: "1534354027"},
         {letter: "O", date: "2014/09/09", win: true,  gameId: "1534324677"},
+        {letter: "P", date: "2014/09/13", win: false, gameId: "1539614301"}
 
     ];
     var getMatchHistoryUrl = function(game) {
