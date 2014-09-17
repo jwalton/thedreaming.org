@@ -24,4 +24,4 @@ You can configure the hotkey in keymap.cson:
 * **[kevinsawicki/monokai](https://github.com/kevinsawicki/monokai)** - The monokai color theme (should be familiar if you're a [Sublime](http://www.sublimetext.com/) user.)
 * **[saschagehlich/autocomplete-plus](https://github.com/saschagehlich/autocomplete-plus)** - Autocomplete while you type.
 
-At the moment, you should also set `editor.normalizeIndentOnPaste` to `false` if you don't want Atom to [remove your indent](https://discuss.atom.io/t/normalize-indent-on-paste-doesnt-work-as-expected/3503/4).
+At the moment, you should also set `editor.normalizeIndentOnPaste` to `false` if you don't want Atom to [remove your indent](https://discuss.atom.io/t/normalize-indent-on-paste-doesnt-work-as-expected/3503/5).
