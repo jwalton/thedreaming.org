@@ -22,4 +22,6 @@ You can configure the hotkey in keymap.cson:
   Highlight problems in coffee-script.  Add a coffeelint.json file to your project to change settings.
 * **[atom/markdown-preview](https://github.com/atom/markdown-preview)** - ctrl-shift-m to show markdown preview.
 * **[kevinsawicki/monokai](https://github.com/kevinsawicki/monokai)** - The monokai color theme (should be familiar if you're a [Sublime](http://www.sublimetext.com/) user.)
+* **[saschagehlich/autocomplete-plus](https://github.com/saschagehlich/autocomplete-plus)** - Autocomplete while you type.
 
+At the moment, you should also set `editor.normalizeIndentOnPaste` to `false` if you don't want Atom to [remove your indent](https://discuss.atom.io/t/normalize-indent-on-paste-doesnt-work-as-expected/3503/4).
