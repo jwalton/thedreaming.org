@@ -87,23 +87,27 @@ This is a quick record of how we've been doing so far (will be updated as we go.
 <script>
 (function() {
     var games = [
-        {letter: "A", date: "2014/08/21", win: true,  gameId: "1503769380"},
-        {letter: "B", date: "2014/08/25", win: false, gameId: "1509033688"},
-        {letter: "C", date: "2014/08/25", win: true,  gameId: "1509102997"},
-        {letter: "D", date: "2014/08/27", win: false, gameId: "1511401723"},
-        {letter: "E", date: "2014/08/27", win: false, gameId: "1511452643"},
-        {letter: "E", date: "2014/08/29", win: true,  gameId: "1514152049", notes: "Missing usual player"},
-        {letter: "F", date: "2014/08/29", win: true,  gameId: "1521284882", notes: "With disconnects"},
-        {letter: "G", date: "2014/09/02", win: false, gameId: "1521284882"},
-        {letter: "H", date: "2014/09/04", win: false, gameId: "1525473140"},
-        {letter: "I", date: "2014/09/04", win: true,  gameId: "1525539867"},
-        {letter: "J", date: "2014/09/05", win: false, gameId: "1527669642"},
-        {letter: "K", date: "2014/09/07", win: true,  gameId: "1531851183"},
-        {letter: "L", date: "2014/09/08", win: false, gameId: "1533122741"},
-        {letter: "M", date: "2014/09/08", win: false, gameId: "1533202510"},
-        {letter: "N", date: "2014/09/09", win: true,  gameId: "1534354027"},
-        {letter: "O", date: "2014/09/09", win: true,  gameId: "1534324677"},
-        {letter: "P", date: "2014/09/13", win: false, gameId: "1539614301"}
+        {letter: "A", date: "2014/08/21", win: true,  gameId: "1503769380", gameType: "Draft"},
+        {letter: "B", date: "2014/08/25", win: false, gameId: "1509033688", gameType: "Draft"},
+        {letter: "C", date: "2014/08/25", win: true,  gameId: "1509102997", gameType: "Draft"},
+        {letter: "D", date: "2014/08/27", win: false, gameId: "1511401723", gameType: "Draft"},
+        {letter: "E", date: "2014/08/27", win: false, gameId: "1511452643", gameType: "Draft"},
+        {letter: "E", date: "2014/08/29", win: true,  gameId: "1514152049", gameType: "Draft", notes: "Missing usual player"},
+        {letter: "F", date: "2014/08/30", win: true,  gameId: "1515279338", gameType: "Draft", notes: "With disconnects"},
+        {letter: "G", date: "2014/09/02", win: false, gameId: "1521284882", gameType: "Draft"},
+        {letter: "H", date: "2014/09/04", win: false, gameId: "1525473140", gameType: "Blind"},
+        {letter: "I", date: "2014/09/04", win: true,  gameId: "1525539867", gameType: "Draft"},
+        {letter: "J", date: "2014/09/05", win: false, gameId: "1527669642", gameType: "Draft"},
+        {letter: "K", date: "2014/09/07", win: true,  gameId: "1531851183", gameType: "TB"},
+        {letter: "L", date: "2014/09/08", win: false, gameId: "1533122741", gameType: "TB"},
+        {letter: "M", date: "2014/09/08", win: false, gameId: "1533202510", gameType: "TB"},
+        {letter: "N", date: "2014/09/09", win: true,  gameId: "1534354027", gameType: "TB"},
+        {letter: "O", date: "2014/09/09", win: true,  gameId: "1534324677", gameType: "TB"},
+        {letter: "P", date: "2014/09/13", win: false, gameId: "1539614301", gameType: "TB"},
+        {letter: "Q", date: "2014/09/19", win: false, gameId: "1548309979", gameType: "TB"},
+        {letter: "R", date: "2014/09/19", win: true , gameId: "#", gameType: "TB"},
+        {letter: "S", date: "2014/09/19", win: false , gameId: "1548311000", gameType: "TB"}
+
 
     ];
     var getMatchHistoryUrl = function(game) {
@@ -115,12 +119,13 @@ This is a quick record of how we've been doing so far (will be updated as we go.
         var gameClass = game.win ? "lol-win" : "lol-loss";
         var gameIcon = game.win ? "fa-check-circle" : "fa-times-circle";
         var title = game.win ? "Victory" : "Defeat";
-        var extras = game.date + (game.notes ? (" • "  + game.notes) : "")
+        var extras = [game.date,  game.gameType];        
+        if(game.notes != null) {extras.push(game.notes);}
 
         return '<a href="' + getMatchHistoryUrl(game) + '" class="lol-game ' + gameClass + '">' +
             '<span class="status-icon"><i class="fa ' + gameIcon + '"></i></span>' +
             '<span class="content"><span class="title">' + title + '</span>' +
-            '<span class="lol-extras">' + extras + '</span></span></a>'
+            '<span class="lol-extras">' + extras.join(" • ") + '</span></span></a>'
     }
 
     // Build the table of games by letter.
