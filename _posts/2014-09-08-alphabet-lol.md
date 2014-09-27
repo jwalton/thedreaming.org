@@ -105,7 +105,7 @@ This is a quick record of how we've been doing so far (will be updated as we go.
         {letter: "O", date: "2014/09/09", win: true,  gameId: "1534324677", gameType: "TB"},
         {letter: "P", date: "2014/09/13", win: false, gameId: "1539614301", gameType: "TB"},
         {letter: "Q", date: "2014/09/19", win: false, gameId: "1548309979", gameType: "TB"},
-        {letter: "R", date: "2014/09/19", win: true , gameId: "#", gameType: "TB"},
+        {letter: "R", date: "2014/09/19", win: true , gameId: "1548370013", gameType: "TB"},
         {letter: "S", date: "2014/09/19", win: false , gameId: "1548311000", gameType: "TB"}
 
 
