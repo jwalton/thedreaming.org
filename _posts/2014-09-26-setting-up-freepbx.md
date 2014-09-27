@@ -122,7 +122,7 @@ Now go to *Applications -> IVR*.  Click "Add a new IVR".
     Timeout Retries: Disabled
 
     IVR Entries:
-    Ext: 1, Destination: Extensions -> 60000
+    Ext: 1, Destination: Extensions -> 6000
 
 Finally, go to *Connectivity -> Inbound Routes* (or go edit the Inbound Route you created while setting up the SPA-3102 above, if you created one.)  Click "Add Incoming Route".
 
