@@ -155,9 +155,12 @@ To record a greeting, dial *97, enter your password, and then press "0" to get t
 Google Voice and Skype
 ======================
 
-If you're interested in getting outbound calling working through Google Hangouts, check out [this article](http://sites.psu.edu/psuvoip/2010/11/09/adding-google-voice-to-freepbx/).  I've successfully had this running with a plain Google Talk account in Canada, without Google Voice, although it sounds like this sort of thing is now [officially frowned upon by Google](https://plus.google.com/u/0/+NikhylSinghal/posts/MjyncJEbzxK).  Too bad, as this was a good way to get free long distance.
+<p><strike>If you're interested in getting outbound calling working through Google Hangouts, check out <a href="http://sites.psu.edu/psuvoip/2010/11/09/adding-google-voice-to-freepbx/">this article</a>.  I've successfully had this running with a plain Google Talk account in Canada, without Google Voice, although it sounds like this sort of thing is now <a href="https://plus.google.com/u/0/+NikhylSinghal/posts/MjyncJEbzxK">officially frowned upon by Google</a>.  Too bad, as this was a good way to get free long distance.</strike></p>
+
+Update: chan_gtalk and res_jabber have been replaced in Asterisk 11 with chan_motif an res_xmpp.  Go to *Admin -> Module Admin*.  Under "Repositories" make sure "Basic", "Extended", and "Unsupported" are all highlighted.  Click "Check Online".  You should see a module called "Google Voice/Chan Motif".  I haven't had a chance to play with this yet, but [this](http://highsecurity.blogspot.ca/2012/12/asterisk-11-and-chanmotif-on-freepbx.html) will likely be helpful reading.
 
 I haven't tried setting up Skype, but you might be able to get Skype working by [following these instructions](http://www.freepbx.org/support/documentation/howtos/how-to-set-up-a-skype-gateway).
+
 
 311
 ===
