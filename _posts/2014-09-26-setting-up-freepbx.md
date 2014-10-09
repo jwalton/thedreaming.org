@@ -179,6 +179,6 @@ Alternatively, if you have a real PSTN line plugged into your SPA-3102, you can 
 
     (*xx|*21*xx.|#21#|[3469]11<:@gw0>|0|00|613[2-9]xxxxxx|343[2-9]xxxxxx|819[2-9]xxxxxx|873[2-9]xxxxxx|1xxx[2-9]xxxxxxS0|xxxxxxxxxxxx.)
 
-The "<@:gw0>" will route calls to 311, 411, 611, and 911 through to to PSTN, bypassing FreePBX completely.  You can read more about SPA-3102 dial plans [here](http://voicent.com/predictive-dialer/blog/index.php/predictive-dialer/380/spa3102-dial-plan).
+The "<@:gw0>" will route calls to 311, 411, 611, and 911 through to to PSTN, bypassing FreePBX completely.  You can read more about SPA-3102 dial plans [here](http://voicent.com/predictive-dialer/blog/index.php/predictive-dialer/380/spa3102-dial-plan) and [here](http://www.cisco.com/c/en/us/support/docs/collaboration-endpoints/spa901-1-line-ip-phone/108747-pqa-108747.html).
 
-Note that if you use a dialplan like this for 911, you have to be double-plus-sure you deconfigure this if you ever switch from using a PSTN to a Voip line, otherwise 911 won't work for you.
+Note that if you use a dial plan like this for 911, you have to be double-plus-sure you deconfigure this if you ever switch from using a PSTN to a Voip line, otherwise 911 won't work for you.
