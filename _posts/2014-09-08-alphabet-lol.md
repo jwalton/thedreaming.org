@@ -112,7 +112,7 @@ This is a quick record of how we've been doing so far (will be updated as we go.
         {letter: "V", date: "2014/10/05", win: false, gameId: "1570513554", gameType: "TB"},
         {letter: "W", date: "2014/10/05", win: false, gameId: "1570514223", gameType: "TB"},
         {letter: "X", date: "2014/10/09", win: false, gameId: "1575395894", gameType: "TB"},
-        {letter: "Y", date: "2014/10/10", win: false, gameId: "1576478189", gameType: "TB"}
+        {letter: "Y", date: "2014/10/10", win: true,  gameId: "1576478189", gameType: "TB"}
     ];
     var getMatchHistoryUrl = function(game) {
         return "http://matchhistory.na.leagueoflegends.com/en/#match-details/NA1/" + game.gameId;
