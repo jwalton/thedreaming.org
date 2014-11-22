@@ -1,0 +1,30 @@
+---
+title: "On the Construction of Murderous Robots"
+tags:
+- robots
+- halting problem
+---
+Englert, Siebert, and Ziegler recently [published a paper](https://medium.com/the-physics-arxiv-blog/halting-problem-proves-that-a-lethal-robot-cannot-correctly-decide-whether-to-kill-a-human-7c014623c13f) which purports to prove that it is impossible for a robot to correctly decide whether or not to kill a person.
+
+<!--more-->
+The basic premise of their paper goes like this; we have a villainess who purports to be reformed.  The villainess in question is also the author of a piece of software which controls a train switch.  You are suspicious that the code in question has been deliberately written in such a way that the switch will maliciously send a train down a closed track, causing potential danger tao train employees working on the track.  You are also a robot.  You need to decide whether to accept this software and send the villainess on her way, or reject the software and detain the villainess on the grounds that she has crafted malicious software, with the intent to cause bodily harm.
+
+The paper states that, due to the [halting problem](http://en.wikipedia.org/wiki/Halting_problem), this is impossible.  The halting problem states that, given an arbitrary computer program and an input for that program, it is impossible to decide whether or not the program will eventually terminate, or will execute forever.  Since the halting problem exists, it may be that for some inputs the villainess's software will never terminate, so it is impossible to algorithmically decide whether or not the program is correct for all inputs.
+
+One of the key parts of the halting problem, though, is the "arbitrary computer program" part.  It is impossible to solve the halting problem in a generic way for any computer program.  There are certainly subsets of "all arbitrary computer programs" for which the halting problem can be solved.  Let's look at a concrete example:
+
+    console.log("Hello world");
+
+This is a short JavaScript application.  It is obvious that it terminates - it is a program that maintains no state and has no conditional statements.  In fact, any program that has no loops or recursion is guaranteed to eventually complete.  This is a pretty small subset of software, though - most programs need loops or recursion to get useful work done.
+
+The villainess, though, is also not giving us an arbitrary piece of software; she's giving us a piece of software designed to control a train switch.  In computer engineering terms, she's giving us a piece of software designed to run on an embedded system, which typically runs under extremely tight processor and memory constraints.
+
+A central tenant of embedded system design is that you pre-allocate all of your memory at program initialization.  If a train is coming, and your program needs to decide whether or not to move a switch, the program can't call `malloc()` to allocate some memory - if the system is out of memory, `malloc` will fail, and then your program can't proceed (and there's a train coming, so proceeding is not exactly optional.)
+
+So, to verify our villainess's software, the first step is to ensure that all calls to `malloc()` occur before the first conditional statement.  This is easy enough to do algorithmically.  If this is not the case, the villainess should be detained indefinitely - not because her program might be incorrect, but because she's a terrible software engineer and has no business writing train control systems.  If this *is* the case, then at this point our program consists of a finite amount of memory, a finite number of instructions, and a "program counter" which indicates which instruction is currently executing.  More formally, our system is a turning machine with an alphabet of length *M*, an instruction set of length *i*, and a *finite length tape* of *N* cells.  The finite length tape is the key - this turing machine is functionally equivalent to a finite state machine with at most <i>iM<sup>N</sup></i> states, and for a finite state machine, it is trivial to solve the halting problem.
+
+To prove this program halts for a given input *k*, we start the program, and then we write down the current contents of all allocated memory and the current *program counter*.  We call what we've just written down "state 1".  Then we execute the instruction at the current *program counter* (which may modify some memory and the *program counter*) and we generate a new state which we call "state 2".  We iteratively do this until we either arrive at a halting state (in which case we know the program halts) or we find ourselves at a state we have already visited (in which case we know the program will never halt.)
+
+In case you're wondering why this algorithm can't be applied to an arbitrary computer program, it is precisely because an arbitrary program can allocate unbounded memory - the standard model of a Turing machine does not have a finite length tape.  It's also important to note that for a large quantity of memory, this problem is solvable, but not practically so.  A program that uses sixteen gigabytes of RAM can be in <i>i2<sup>16G</sup></i> different states, which is rather a lot.  Enough that, by the time you'd completed the above algorithm, the villainess would be dead, the workers on the track would be dead, every start in the sky you can see would be dead.  Likely, in fact, you'd have been forced to convert the rest energy of the stars, the workers, the villainess, and all the other objects in the observable universe into electricity to power your algorithm, and you'd have [come up short](http://arxiv.org/pdf/astro-ph/0404510.pdf).
+
+The fact that this particular algorithm is inefficient, however, does not rule out the existence of more efficient algorithms for verifying train switch control programs.  It is entirely possible we should welcome our train-engineer incarcerating robot overlords.
