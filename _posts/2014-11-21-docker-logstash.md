@@ -32,6 +32,11 @@ file, which should look like:
         'port' => "9998"
         codec => json
       }
+
+      udp {
+        'port' => "9999"
+        codec => json
+      }
     }
 
     output {
@@ -48,6 +53,7 @@ Then we're going to use P. Barrett Little's [docker-logstash](https://github.com
       -p 9292:9292 \
       -p 9200:9200 \
       -p 9998:9998 \
+      -p 9999:9999/udp \
       -v /path/to/logstash-embedded.conf:/opt/logstash.conf \
       pblittle/docker-logstash
 
@@ -99,7 +105,7 @@ Then, we run the following commands:
       --name logstash \
       --link elasticsearch:es \
       -p 9998:9998 \
-      -p 9999:9999 \
+      -p 9999:9999/udp \
       -v /Users/jwalton/logstash.conf:/opt/logstash.conf \
       pblittle/docker-logstash
 
@@ -215,7 +221,7 @@ Now we can start up all of this with:
       --name logstash \
       --link elasticsearch:es \
       -p 9998:9998 \
-      -p 9999:9999 \
+      -p 9999:9999/udp \
       -v /Users/jwalton/logstash.conf:/opt/logstash.conf \
       pblittle/docker-logstash
 
@@ -276,4 +282,5 @@ If you see some entries, but the date is wrong, and you're on boot2docker, note 
       }
 
 then `docker rm -f logstash`, restart your logstash container, and run `docker logs -f logstash` - any logs that logstash is seeing it should show up in stdout.
+
 
