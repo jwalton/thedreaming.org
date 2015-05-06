@@ -1,8 +1,8 @@
 ---
 title: "Generating a coverage badge with Istanbul and S3"
 tags:
-- coffee-script
-- development
+- istanbul
+- s3
 - javascript
 ---
 
