@@ -19,3 +19,7 @@ This tries to delete all the images, and will probably give you a ton of warning
     for i in `sudo docker images|grep \<none\>|awk '{print $3}'`;do sudo docker rmi $i;done
 
 which will delete only images with "&lt;none&gt;" in their tag or repository columns.
+
+Update: Found this slick command on [stack overflow](http://stackoverflow.com/questions/28085067/docker-images-eats-up-lots-of-space?lq=1):
+
+    docker rmi $(docker images -q -f dangling=true)
