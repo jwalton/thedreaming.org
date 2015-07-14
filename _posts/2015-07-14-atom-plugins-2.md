@@ -3,7 +3,7 @@ title: Essential Plugins for Atom v1.0
 tags:
 - text-editor
 - atom
-date: '2014-09-08 20:47:00'
+date: '2015-07-14 10:00:00'
 ---
 With Atom 1.0 out, a revised list of handy plugins I've found for the [Atom text editor](https://atom.io/).
 
