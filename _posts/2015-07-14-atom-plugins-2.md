@@ -19,7 +19,7 @@ You can configure the hotkey in keymap.cson:
 * **[color-picker](https://atom.io/packages/color-picker)**
   - shift-cmd-c to edit HTML colors.
 * **[linter-coffeelint](https://atom.io/packages/linter-coffeelint)** -
-  Highlight problems in coffee-script.  Add a coffeelint.json file to your project to change settings.
+  Highlight problems in coffee-script.  Add a coffeelint.json file to your project to change settings.  Note that this needs [linter](https://atom.io/packages/linter) installed to work.
 * **[atom-monokai](https://atom.io/packages/atom-monokai)** - The monokai color theme (should be familiar if you're a [Sublime](http://www.sublimetext.com/) user.)
 * **[pigments](https://atom.io/packages/pigments)** - Show web colors in background of file.
 
