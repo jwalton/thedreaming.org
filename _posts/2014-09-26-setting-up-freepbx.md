@@ -182,3 +182,26 @@ Alternatively, if you have a real PSTN line plugged into your SPA-3102, you can 
 The "<@:gw0>" will route calls to 311, 411, 611, and 911 through to to PSTN, bypassing FreePBX completely.  You can read more about SPA-3102 dial plans [here](http://voicent.com/predictive-dialer/blog/index.php/predictive-dialer/380/spa3102-dial-plan) and [here](http://www.cisco.com/c/en/us/support/docs/collaboration-endpoints/spa901-1-line-ip-phone/108747-pqa-108747.html).
 
 Note that if you use a dial plan like this for 911, you have to be double-plus-sure you deconfigure this if you ever switch from using a PSTN to a Voip line, otherwise 911 won't work for you.
+
+Update: Setting up gmail as your email server
+=============================================
+
+These days most ISPs will block you from sending email over the SMTP port, so you need to use an intermediary like gmail to send email for you.  This is [stolen from Steve McCann's blog](http://www.stevemccann.net/2012/12/changing-freepbx-smtp-server-to-gmail.html), so go read that if you want all the details, but basically you want to SSH into your FreePBX machine, add the following lines to /etc/postfix/main.cf:
+
+    relayhost = [smtp.gmail.com]:587
+    smtp_sasl_auth_enable = yes
+    smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+    smtp_sasl_security_options = noanonymous
+    smtp_use_tls = yes
+
+Then create /etc/postfix/sasl_passwd (replacing your username and password as appropriate):
+
+    [smtp.gmail.com]:587 user.name@gmail.com:password
+
+And finally run the following commands:
+
+    chmod 400 /etc/postfix/sasl_passwd
+    postmap /etc/postfix/sasl_passwd
+    chown postfix /etc/postfix/sasl_passwd
+    /etc/init.d/postfix reload
+
