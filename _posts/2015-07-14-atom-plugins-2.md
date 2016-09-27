@@ -32,3 +32,4 @@ Update: more suggestions from [Mac Pham](https://github.com/macpham):
 * **[minimap](https://atom.io/packages/minimap)** - Mini-map sidebar on right hand side, like Sublime.
 * **[react](https://atom.io/packages/react)** - React support.
 * **[tabs-to-spaces](https://atom.io/packages/tabs-to-spaces)** - Convert tabs to spaces (or the reverse.)
+* **[dockblockr](https://atom.io/packages/docblockr)** - Automatic creation of documentation comments.
