@@ -8,6 +8,9 @@ tags:
 ---
 Because this took me all day today, I wanted to share how to get [Logstash](http://logstash.net/)
 up and running under [Docker](https://www.docker.com/).
+
+There's an updated version of this post [here](/2017/02/01/docker-logstash-revisited/)
+
 <!--more-->
 
 ## ELK
@@ -282,5 +285,3 @@ If you see some entries, but the date is wrong, and you're on boot2docker, note 
       }
 
 then `docker rm -f logstash`, restart your logstash container, and run `docker logs -f logstash` - any logs that logstash is seeing it should show up in stdout.
-
-
