@@ -9,7 +9,7 @@ tags:
 Because this took me all day today, I wanted to share how to get [Logstash](http://logstash.net/)
 up and running under [Docker](https://www.docker.com/).
 
-There's an updated version of this post [here](/2017/02/01/docker-logstash-revisited/)
+There's an updated version of this post [here](/2017/02/01/docker-logstash-revisited/).
 
 <!--more-->
 
