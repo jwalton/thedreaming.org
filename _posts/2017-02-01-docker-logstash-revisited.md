@@ -35,7 +35,7 @@ The following will start a new Elasticsearch, Logstash, and Kibana server in a "
     EOL
     docker network create elk
     docker run -it -d --net elk --name elasticsearch -p 9200:9200 -p 9300:9300 elasticsearch:latest
-    docker run -it -d --net elk --name logstash -p 9998:9998 -v ~/docker/logstash.conf:/config-dir logstash:latest -f /config-dir/logstash.conf
+    docker run -it -d --net elk --name logstash -p 9998:9998 -v ~/docker/logstash:/config-dir logstash:latest -f /config-dir/logstash.conf
     docker run -it -d --net elk --name kibana -e ELASTICSEARCH_URL=http://elasticsearch:9200 -p 5601:5601 kibana:latest
 
 The first bit creates a new logstash.conf file.  Obviously you can tweak this to suit your needs.  The four docker
