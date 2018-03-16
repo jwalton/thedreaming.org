@@ -67,9 +67,10 @@ I like to run my unit tests directly from the /src folder, using `babel-register
 to compile source files on the fly.  This means you don't need to rebuild your
 whole project to run a test.  This requires a little care when configuring
 swagger-node-runner, as we need to tell it to load controllers from /src during
-tests, but /lib in production.  The sample project does it by "lying" to
-swagger-node-runner about the root folder of the app, claiming to be running
-from the /src or /lib folder.
+tests, but /lib in production.  The sample project does it by
+["lying" to swagger-node-runner about the root folder of the app](https://github.com/jwalton/node-swagger-template/blob/d2d9f6e1d326f1e227acae818b9ccdd231592f3a/src/swagger/config.js#L10),
+claiming to be running from the /src or /lib folder depending on which folder
+`config.js` is being loaded from.
 
 ## Our Swagger API
 
@@ -82,10 +83,10 @@ http://localhost:10010/api/v1/user?id=54f0be26ae8aba260b8f6db7
 
 and we want to get back a `User` object from MongoDB.  (We're not actually
 going to have a MongoDB instance in the background, as we're just interested
-in the Swagger part of this.  Our swagger definition can be found
+in the Swagger part of this.)  Our swagger definition can be found
 [here](https://github.com/jwalton/node-swagger-template/blob/d2d9f6e1d326f1e227acae818b9ccdd231592f3a/api/swagger/swagger.yaml).
 
-Have a look a the '/user' path:
+The interesting part for now is the '/user' path:
 
 ```yaml
 paths:
@@ -105,19 +106,19 @@ paths:
           format: ObjectId
 ```
 
-As noted in the comments, the `x-swagger-router-controller` tells
-swagger-node-runner which source file the "controller" for this path is in.
+The `x-swagger-router-controller` tells swagger-node-runner which source file
+the "controller" for this path is in.
 
 You'll also note that we've specified there is one required parameter "id",
-which is a "string" in "ObjectId" format.  If you're familiar with OpenAPI,
-you'll know that "ObjectId" is not one of the standard formats provided by
-OpenAPI. We're going to do some custom validation here; more on that in our
-next article.
+which is a "string" in "ObjectId" format.  MongoDB uses 24 digit hex numbers as
+IDs.  If you're familiar with OpenAPI, you'll know that "ObjectId" is not one
+of the standard formats provided by OpenAPI.  We're going to do some custom
+validation here; more on that in our next article.
 
-Also note that at the top of this swagger.yaml file, we specified a `basePath`
-of `/api/v1`.  This means the URL for this route is actually `/api/v1/user`,
-even though it's listed as `/user` here.  The basePath gets appended to
-the start of every path.
+Also note that at the top of this swagger.yaml file, we specified
+[a `basePath` of `/api/v1`](https://github.com/jwalton/node-swagger-template/blob/d2d9f6e1d326f1e227acae818b9ccdd231592f3a/api/swagger/swagger.yaml#L8).
+ This means the URL for this route is actually `/api/v1/user`, even though it's
+ listed as `/user` here.  The basePath gets appended to the start of every path.
 
 ## Writing a Controller
 
@@ -158,7 +159,7 @@ these together, and takes care of routing, validating incoming
 requests to make sure they match the schema defined in the definition, and
 calling into our controller.  This is where swagger-node-runner comes in.
 
-By default, swagger-node-runner uses the [config](https://www.npmjs.com/package/config)
+swagger-node-runner uses the [config](https://www.npmjs.com/package/config)
 module to load it's configuration from `/config/default.yaml` in the root of
 your project.  If you're already using `config`, you can just add a `swagger`
 entry to your config file.  If you're not using config, you can just pass all
@@ -175,6 +176,14 @@ swaggerNodeRunner.create({
     ...
 }, done);
 ```
+
+(Edit: I've just discovered that swagger-node-runner calls `config` in
+"strict mode", which means that if you run your app with `NODE_ENV=production`,
+`config` will produce a warning because 'production.yaml' doesn't exist.  A
+better solution might be to make a 'swagger' folder in your project, and tell
+swaggerNodeRunner that this swagger folder is your "appRoot".  Then you can
+either create 'swagger/config/default.yaml' and friends and put your
+configuration there, or you can create empty files to appease `config`.)
 
 At a minimum, the call to `swaggerNodeRunner.create()` needs to contain
 `appRoot`, the path to the root of your source tree.  swagger-node-runner
