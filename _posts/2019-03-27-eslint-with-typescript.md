@@ -201,10 +201,11 @@ subtrees that are typescript or javascript, another solution is to put a
 "closest" configuration file (although it will keep walking up the tree, and
 merge higher up configuration files with lower ones).
 
-The solution below was suggested by [@bradzacher](https://github.com/bradzacher),
-and uses the fact that eslint will let us use a .js config file.  The basic idea
-is to `require` eslint-plugin's configuration, and manually merge it into
-an `overrides` block to get around the `extends` limitation:
+The solution below was [suggested](https://github.com/typescript-eslint/typescript-eslint/issues/36#issuecomment-477703388)
+by [@bradzacher](https://github.com/bradzacher), and uses the fact that eslint
+will let us use a .js config file.  The basic idea is to `require`
+eslint-plugin's recommended configuration, and manually merge it into an
+`overrides` block to get around the `extends` limitation:
 
 ```js
 // .eslintrc.js
