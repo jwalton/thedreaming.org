@@ -1,5 +1,5 @@
 ---
-title: "Use eslint with Typescript today"
+title: "Use eslint with Typescript, today!"
 tags:
 - javascript
 - typescript
