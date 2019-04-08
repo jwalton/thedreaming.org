@@ -22,4 +22,12 @@ which will delete only images with "&lt;none&gt;" in their tag or repository col
 
 Update: Found this slick command on [stack overflow](http://stackoverflow.com/questions/28085067/docker-images-eats-up-lots-of-space?lq=1):
 
-    docker rmi $(docker images -q -f dangling=true)
+    sudo docker rmi $(sudo docker images -q -f dangling=true)
+
+Update 2019-04: This is built into docker now:
+
+    # Delete stopped containers:
+    docker container prune --force
+
+    # Delete stale images
+    docker image prune -a --force
