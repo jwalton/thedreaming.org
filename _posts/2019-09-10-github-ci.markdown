@@ -1,0 +1,498 @@
+---
+title: "Using GitHub Actions for Continuous Integration!"
+tags:
+- github
+- github actions
+- ci
+- javascript
+---
+
+Right now GitHub Actions is in Beta, but it's due to come out of beta soon!
+This tutorial will run you through how you can configure GitHub Actions (using
+the new YAML based interface) to build and test your javascript app, from simple
+apps to complicated ones.  Lots and lots of examples to get you going.
+
+<!--more-->
+
+Right now GitHub Actions is still in beta, so to get any of these examples to
+work you'll need to apply for the beta program.
+
+## A Simple CI Action
+
+To enable actions, all you need to do is create a folder in your project called
+`.github/workflows` (notice the leading "." on ".github") and put a YAML file
+inside.  For example, the file below is `.github/workflows/build.yaml`.
+
+This is a simple workflow which will build and test your node.js app:
+
+```yaml
+name: Build
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10'
+      - name: test
+        run: |
+          npm install
+          npm test
+```
+
+Let's walk through this step by step.  First we have an `on: [push, pull_request]`,
+which defines what events cause this workflow to run.  There are a lot of events
+you can use to trigger a workflow - here we're tirggering on pushes and on (some)
+pull_request events.  But you can run a workflow when a PR is commented on, when
+a label is added to an issue, when a new issue is opened - there's really no
+limit.  See the [https://help.github.com/en/articles/events-that-trigger-workflows](official documentation) for a list of all events.
+
+I say "some" pull_request events, because by default `pull_request` triggers on
+PRs being opened, reopened, or synchronized.  You can get this to trigger on
+other events too, like when someone comments on a PR or when a PR is closed,
+but these are less useful for a CI workflow.
+
+Then we have a set of jobs - these jobs can run in parallel, or they can specify
+dependencies on each other.  We just have one job, with a set of steps, which run
+one after another on the same machine, in squence.
+
+The first step is the [checkout action](https://github.com/actions/checkout) which
+checks out our code.  Note that for `pull_request` events, `actions/checkout`
+will actually checkout the head of our PR and then automatically merge it against
+the base this PR is against (so if we open a PR against master,
+`actions/checkout` will checkout our branch, then merge it against master for
+us).
+
+The second step [sets up node-js at version 10](https://github.com/actions/setup-node).
+You actually don't strictly need to use `setup-node`, as node is already installed
+on the ubuntu image we're using, but this lets us pick the version of node.js we
+want.  You can see a
+[list of all the software that comes pre-installed](https://help.github.com/en/articles/software-in-virtual-environments-for-github-actions).
+
+Finally, the "test" step is the interesting one.  It does `npm install` and then
+runs `npm test`.  Depending on your project you might need an `npm run build`
+in there too (pro tip: you can put your build in a `prepare` script in
+package.json to make it run as part of `npm install`).
+
+That's about as simple as this could get.  Let's make it a little more interesting...
+
+## Testing with Multiple Node.js Versions
+
+```yaml
+name: Build
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ['12', '10']
+    name: Node ${{ matrix.node }} sample
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+      - run: npm test
+```
+
+First, we've added a "matrix strategy" to our build, to run our tests on multiple
+versions of node.js.  Second, we split our "test" step up into two steps:
+"npm install" and "test".  I prefer to split these up into smaller steps,
+because when something fails in the "test" part, I don't have to wade through
+logs from the "npm install" part.
+
+Note that Actions is smart enough to skip the "test" step if the "npm install"
+step fails.  Although, if we have a step we want to run in a failure case, we
+can make that happen.
+
+## Running an Action on Failure, and Handling Artifacts
+
+```yaml
+name: Build
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: npm install
+      - run: npm test
+      - name: Collect screenshot
+        if: failure()
+        run: |
+          ./bin/makeScreenshot /tmp/screen.jpg
+      - name: Upload logs
+        uses: actions/upload-artifact@master
+        if: failure()
+        with:
+          name: screen.jpg
+          path: /tmp/screen.jpg
+```
+
+Notice we have two steps with `if: failure()` - these steps will only run if
+some previous steps have failed.
+
+We're also using the [upload-artifact](https://github.com/actions/upload-artifact)
+action here to upload our screen shot to GitHub as an artifact.  When you view
+a run of this action in GitHub Actions, in the upper right corner there will be
+a dropdown that will let you view any artifacts created during the build.  There's
+also a [download-artifact](https://github.com/actions/download-artifact).
+
+So far, all the examples we've had here run in a single "job".  If you have
+multiple jobs they will run on different VMs, so you may want to create an
+artifact in one job, and then download it in another so you have it available
+without rebuilding it.  At present there is no way to delete artifacts from
+GitHub, so be careful about uploading anything sensitive!
+
+## Secrets - Using private NPM packages
+
+Speaking of sensitive information, let's say you're using private NPM packages.
+When you want to install a package in your CI environment, you'll need an NPM
+token with read permission to your packages.
+
+As we all know, it's a really bad idea to commit tokens and other secrets into
+a github repo.  So we're going to put our secrets somewhere more secure.  In
+your repo, click on "Settings", then pick "Secrets" on the left hand side.
+Click on "Add a new secret" and call it "NPM_TOKEN", and enter an NPM token.
+
+Now we can do:
+
+```yaml
+name: Build
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install Dependencies
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm install --ignore-scripts
+      - name: Run npm post-install scripts
+        run: |
+          npm rebuild --quiet
+          npm run prepare --if-present
+      - name: test
+        run: npm test
+```
+
+We're doing a couple of new things here.  First of all, we're setting a
+`registry-url` in the `setup-node` action.  This might seem a little strange -
+why are we setting the registry URL to point to the default registry?  The
+answer is that `registry-url` does something a little more than just set this
+URL.  It actually writes a `~/.npmrc` file which looks something like this:
+
+```
+//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
+```
+
+This means when you run `npm install`, NPM will use the `NODE_AUTH_TOKEN`
+environment variable to authenticate with the registry.  This technique is
+discussed in [this blog post from NPM](https://blog.npmjs.org/post/118393368555/deploying-with-npm-private-modules).
+
+We set the `NODE_AUTH_TOKEN` environment variable using the "secrets" context:
+
+```yaml
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+Any environment variable set in `env` will only be available in the environment
+for that specific step, which limits the exposure of our secrets.  If a library
+we use has some malicious code in it that gets run during our `npm test` step
+and tries to steal our authentication token, the `NODE_AUTH_TOKEN` variable
+won't be available for it to steal.
+
+This is also why we split `npm install` up into `npm install --ignore-scripts`
+and `npm rebuild` - `npm install --ignore-scripts` will not let any post-install
+scripts run in any of our dependencies, which will stop malicious packages from
+stealing our credentials from the "well known" NODE_AUTH_TOKEN environment
+variable.  Once everything is installed, we run `npm rebuild` to run all the
+post-install scripts when our credentials are no longer in the environment.
+(In this example, this is probably excessively paranoid - if a malicious script
+really wanted to steal your NPM credentials, they could just read your ~/.npmrc
+file when you `npm install` on your development machine, but it illustrates how
+you can compartmentalize secrets, and only expose them to the steps that need
+them.)
+
+## Running a Workflow Only on master
+
+It's easy to make it so a whole workflow will only run on a specific branch:
+
+```yaml
+name: Build
+on:
+  push:
+    branches:
+      - master
+```
+
+You can also run a workflow on any branch other than master:
+
+```yaml
+name: Build
+on:
+  push:
+    branches:
+      - '*'
+      - '!master'
+```
+
+## Running a Step Only on master
+
+But sometimes you want to run your workflow on every branch, and there's just
+a single step you want to run only on specific branches.  Let's say you're using
+[semantic-release](https://github.com/semantic-release/semantic-release)
+to automate publishing new releases to NPM.  You only want to run
+`npm run semantic-relase` on master, since this is the only place it needs to
+be run:
+
+```yaml
+name: Build
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10'
+      - run: npm install
+      - run: npm test
+      - name: semantic-release
+        if: success() && github.ref == 'refs/heads/master'
+        env:
+          GH_TOKEN: ${{ secrets.DEPLOY_GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm run semantic-release
+```
+
+The interesting bit here is the `if: success() && github.ref == 'refs/heads/master'`.
+We're getting `github.ref` from the "github context".  The contents of the github
+context are different, depending on what event triggered this action. There are
+a number of [contexts available](https://help.github.com/en/articles/contexts-and-expression-syntax-for-github-actions#contexts)
+with a lot of information in them.
+
+Also, if you already know a little about GitHub Actions, you might know there's
+already a `GITHUB_TOKEN` available in the environment; we need to provide a
+`DEPLOY_GH_TOKEN` here though, because the default `GITHUB_TOKEN` doesn't work
+for semantic-release, so we need a personal access token with all the required
+permissions.
+
+## Running a Step Only For Tags
+
+Very similar to the above case, let's stay you want to create a docker image
+and publish it, but you only want to do this for tags:
+
+```yaml
+steps:
+  - name: push to docker
+    if: success() && startsWith(github.ref, 'refs/tags/')
+    run: docker push ...
+```
+
+(Thanks to [OrangutanGaming](https://github.com/actions/bin/issues/66#issuecomment-523650468)
+for this tip!)
+
+## Conditionally Running a Job
+
+We saw how to run the whole workflow for certain branches/tags, and how to run
+a step for certain branches/tags - it would be very nice if there was a way
+to make it so individual jobs within a workflow run conditionally (only build a
+docker image and deploy if this is a tagged release, for example), but
+unfortunately there's no easy way to do this.  The best you can do right now is
+add an `if:` to every single step in the job.  Note that GitHub will still
+launch a VM for a brief moment even though no steps are going to run.
+
+## Testing with a service
+
+Let's suppose you're writing a library which interacts with RabbitMQ, and you
+need a real RabbitMQ instance running in order to check that your library works.
+The workflow file supports launching services in containers, using essentially
+the same syntax as docker-compose:
+
+```yaml
+name: Build
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      rabbitmq:
+        image: rabbitmq
+        ports:
+          - 5672:5672
+    steps:
+      - uses: actions/checkout@v1
+      - name: test
+        run: |
+          npm install
+          npm test
+```
+
+This will download the latest `rabbitmq` docker image from Docker Hub, launch
+RabbitMQ, and expose port 5672 on localhost so your tests can get to it.  If
+you don't specify a host and container port, you can get the allocated port
+number from the conext (e.g. `${{ job.services.rabbitmq.ports['5672'] }}`).
+
+## Only run on a PR, and using external actions
+
+Let's suppose we have some slow selenium tests we want to
+run, but rather than run them on every single push, we're only going to
+run them on master and on PRs.
+
+If the event is a `pull_request`, it's easy to get the current PR number
+from the context via `${{ github.event.number }}`, but unfortunately this
+information is not readily available for a `push` event.  We can go fetch this
+information from the GitHub API however, using the `GITHUB_TOKEN` which is
+automatically provided to us in the `secrets` context.  To do this, we're
+going to write a quick Github Action.  I'll post another article about how to
+build a custom action, but for now you can find the source for this
+[on GitHub](https://github.com/jwalton/gh-find-current-pr).
+
+```yaml
+name: Build
+on: ['push']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      # Find the PR associated with this push, if there is one.
+      - uses: jwalton/gh-find-current-pr@v1
+        id: findPr
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: test
+        run: |
+          npm install
+          npm test
+      - name: slow tests
+        if: success() && steps.findPr.outputs.pr
+        run: npm test:slow
+```
+
+This workflow only runs on "push", but we'll use a custom action to figure out
+if this is a PR or not.  We have a new step with a
+`uses: jwalton/gh-find-current-pr@v1`, which tells GitHub to go download the
+action with the `v1` tag.  Note that this is not a module published in NPM, it's
+available at [https://github.com/jwalton/gh-find-current-pr](https://github.com/jwalton/gh-find-current-pr).
+
+This action needs some "inputs", in this case a `github-token` to use to call
+into the GitHub API.  (Why don't we have to provide that to
+`actions/checkout@v1` above?  Because that's a special "trusted action" provided
+ by GitHub, so it can cheat and get that secret for itself.)
+
+Finally, this action provides some "outputs", in this case a "pr" which is a
+string containing the PR number, or an empty string if there is no PR.  We give
+the step an `id: findPr` to make it easy to refer to the step later on.
+
+We use these the output via the `steps` context in the  "slow tests" step:
+`if: success() && steps.findPr.outputs.pr`.  If `pr` is set, we'll run the
+tests, and if it's an empty string we'll skip them.
+
+If you're looking for actions to help you out, note that actions are
+[published in GitHub Marketplace](https://github.com/marketplace?type=actions).
+
+## Running Things in Parallel
+
+So far all the examples we've done have run everything in a single job.  We can,
+however, split a task up into multiple jobs to speed things up.  The one caveat
+to this is that everything runs in its own VM, so any setup you need to do, you
+need to do in each job.
+
+For example, you can create a job which just runs eslint
+(and there's even an [action in the marketplace](https://github.com/marketplace/actions/eslint-checks)
+that will help you do this), but you'll have to run the checkout action and
+`npm install` in that job before you can run `eslint`.  If your `npm install`
+takes 2 minues, and your `eslint` run only takes a few seconds, then you're
+better off just running `eslint` in the main job.  (Although there are some
+clever ways around this, like only installing the specific modules you need to
+run `eslint`.)
+
+The actions team also plans to implement caching at some point in the future,
+which may allow us to substantially improve the speed of `npm install`.  Depending
+on the specifics of your project, you may find `npm ci` gives you better
+performance than `npm install`.
+
+```yaml
+name: Build
+on: [push]
+
+jobs:
+  test:
+    name: 🧪 Unit Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: npm install
+      - run: npm test
+  lint:
+    name: ✅ Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: npm install
+      - run: npm run lint
+  build:
+    name: 🛠 Build
+    runs-on: ubuntu-latest
+    # This job will only run if both `test` and `lint` jobs run successfully.
+    needs: [test, lint]
+    steps:
+      - uses: actions/checkout@v1
+      - run: npm install
+      - run: npm run build
+      # Publish to NPM if everything went well
+      - run: npm run semantic-release
+```
+
+Notice the `needs:` line in the `build` step, which prevents build from running
+until both `test` and `lint` are finished and successful.
+
+## Adding a README.md Badge
+
+Ok, here's the part you came here for.  :)
+
+To do this, you need to know your workflow name.  For example, if your workflow
+starts with:
+
+```yaml
+name: My Build
+```
+
+Add the following to your README.md:
+
+```markdown
+![Build Status](https://github.com/your-owner/your-repo/workflows/My%20Build/badge.svg)
+```
+
+Replace the `your-owner`, `your-repo`, and `My%20Build` as appropriate.
+
+## Wrapping Up
+
+Hopefully that gives a taste of the power of GitHub Actions.  There's a
+lot we didn't cover, so be sure to check out
+[the official docs](https://help.github.com/en/categories/automating-your-workflow-with-github-actions),
+but hopefully this was enough to whet your appetite and get you building some
+cool stuff!
