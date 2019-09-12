@@ -12,10 +12,10 @@ This tutorial will run you through how you can configure GitHub Actions (using
 the new YAML based interface) to build and test your javascript app, from simple
 apps to complicated ones.  Lots and lots of examples to get you going.
 
-<!--more-->
+Since GitHub Actions is in beta, to get any of these examples to work you'll
+need to [apply for the beta program](https://github.com/features/actions).
 
-Right now GitHub Actions is still in beta, so to get any of these examples to
-work you'll need to apply for the beta program.
+<!--more-->
 
 ## A Simple CI Action
 
