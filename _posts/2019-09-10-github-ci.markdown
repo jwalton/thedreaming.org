@@ -26,6 +26,7 @@ inside.  For example, the file below is `.github/workflows/build.yaml`.
 This is a simple workflow which will build and test your node.js app:
 
 ```yaml
+{% raw %}
 name: Build
 on: [push, pull_request]
 
@@ -34,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js
         uses: actions/setup-node@v1
         with:
           node-version: '10'
@@ -42,6 +43,7 @@ jobs:
         run: |
           npm install
           npm test
+{% endraw %}
 ```
 
 Let's walk through this step by step.  First we have an `on: [push, pull_request]`,
@@ -83,6 +85,7 @@ That's about as simple as this could get.  Let's make it a little more interesti
 ## Testing with Multiple Node.js Versions
 
 ```yaml
+{% raw %}
 name: Build
 on: [push]
 
@@ -101,6 +104,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm install
       - run: npm test
+{% endraw %}
 ```
 
 First, we've added a "matrix strategy" to our build, to run our tests on multiple
@@ -167,6 +171,7 @@ Click on "Add a new secret" and call it "NPM_TOKEN", and enter an NPM token.
 Now we can do:
 
 ```yaml
+{% raw %}
 name: Build
 on: [push]
 
@@ -190,6 +195,7 @@ jobs:
           npm run prepare --if-present
       - name: test
         run: npm test
+{% endraw %}
 ```
 
 We're doing a couple of new things here.  First of all, we're setting a
@@ -209,8 +215,10 @@ discussed in [this blog post from NPM](https://blog.npmjs.org/post/118393368555/
 We set the `NODE_AUTH_TOKEN` environment variable using the "secrets" context:
 
 ```yaml
+{% raw %}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+{% endraw %}
 ```
 
 Any environment variable set in `env` will only be available in the environment
@@ -264,6 +272,7 @@ to automate publishing new releases to NPM.  You only want to run
 be run:
 
 ```yaml
+{% raw %}
 name: Build
 on: [push]
 
@@ -284,6 +293,7 @@ jobs:
           GH_TOKEN: ${{ secrets.DEPLOY_GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm run semantic-release
+{% endraw %}
 ```
 
 The interesting bit here is the `if: success() && github.ref == 'refs/heads/master'`.
@@ -353,7 +363,7 @@ jobs:
 This will download the latest `rabbitmq` docker image from Docker Hub, launch
 RabbitMQ, and expose port 5672 on localhost so your tests can get to it.  If
 you don't specify a host and container port, you can get the allocated port
-number from the conext (e.g. `${{ job.services.rabbitmq.ports['5672'] }}`).
+number from the conext (e.g. `{% raw %}${{ job.services.rabbitmq.ports['5672'] }}{% endraw %}`).
 
 ## Only run on a PR, and using external actions
 
@@ -362,7 +372,7 @@ run, but rather than run them on every single push, we're only going to
 run them on master and on PRs.
 
 If the event is a `pull_request`, it's easy to get the current PR number
-from the context via `${{ github.event.number }}`, but unfortunately this
+from the context via `{% raw %}${{ github.event.number }}{% endraw %}`, but unfortunately this
 information is not readily available for a `push` event.  We can go fetch this
 information from the GitHub API however, using the `GITHUB_TOKEN` which is
 automatically provided to us in the `secrets` context.  To do this, we're
@@ -371,6 +381,7 @@ build a custom action, but for now you can find the source for this
 [on GitHub](https://github.com/jwalton/gh-find-current-pr).
 
 ```yaml
+{% raw %}
 name: Build
 on: ['push']
 jobs:
@@ -390,6 +401,7 @@ jobs:
       - name: slow tests
         if: success() && steps.findPr.outputs.pr
         run: npm test:slow
+{% endraw %}
 ```
 
 This workflow only runs on "push", but we'll use a custom action to figure out
