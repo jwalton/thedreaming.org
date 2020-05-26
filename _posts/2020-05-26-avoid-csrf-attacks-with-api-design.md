@@ -24,7 +24,7 @@ wants you to do.
 
 Fortunately, modern browsers have all sorts of protections in place to prevent
 this sort of thing. Unfortunately, if you don't know how these work it can be
-easy to accidentally bypass those proections. This article is going to give you
+easy to accidentally bypass those protections. This article is going to give you
 some practical advice you can use to help avoid that.
 
 ## Never use GET to modify state
@@ -42,7 +42,7 @@ const onClick = () => {
 };
 ```
 
-You probably already know this is a bad idea; GET requests should never change
+You probably already know this is a bad idea. GET requests should never change
 state. For one thing, the browser might decide to cache this GET request, so
 doing this twice on the client might end up only doing it once on the server.
 Some HTTP clients also assume that GET requests are safe to send again, so a
@@ -80,7 +80,7 @@ website is going to end up stealing your customer's money anyways.
 
 Fortunately, it's easy to avoid this; just don't let GET requests modify state.
 
-## Don't accept form encoded bodies
+## CSRF Tokens
 
 Let's pretend it's 1995, and you're building a website. You might write
 an HTML form like this:
@@ -95,7 +95,7 @@ an HTML form like this:
     To:
     <input name="to" />
   </div>
-  <input type="submit" value="Send my moneys!"></button>
+  <input type="submit" value="Send my moneys!" />
 </form>
 ```
 
@@ -123,48 +123,81 @@ server.
 You might be surprised that the same origin policy doesn't protect you here, but
 again the same origin policy only really applies to scripts, and that "form"
 tag isn't one. Part of the problem here is that the same origin policy wasn't
-arround in the early days of the web, so there were lots of websites that would
+around in the early days of the web, so there were lots of websites that would
 have been broken if these rules had applied to forms.
 
 (And actually, the same origin policy wouldn't even protect you here in a script,
-because a GET or a POST with a form encoding is is what's called a "[simple request](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#Examples_of_access_control_scenarios)"
+because a GET or a POST with a form encoding is what's called a "[simple request](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#Examples_of_access_control_scenarios)"
 from a CORS perspective, and scripts are allowed to make simple requests,
 they're just not allowed to read the result. The request will have "evilcorp.com"
 in the "origin" header, and you can set up your server to detect that, but in
 the default case, most servers will be vulnerable.)
 
-Now, this is probably not how you're writing your forms. You're probably using
-React or Angular or Vue, and your forms probably have a submit handler that
-calls the WHAT-WG fetch API or something similar, and sends data as
-"application/json" encoded data. That's all good, and you might think you have
-nothing to worry about.
+One way to secure yourself here is to use something called a CSRF token.
+The basic idea is to generate a random token and store it in your user session,
+then make it so the CSRF token is either submitted by forms in a hidden field
+or added as an extra "x-csrf-token" header in each API call. Server side, you
+can check to make sure the CSRF token matches the one stored in the session.
+Since it should be impossible for an attacker to get the CSRF token (the same
+origin policy _does_ protect javascript from reading the contents of a response)
+it makes it much more difficult for an attacker.
 
-But, I've seen a plenty of express.js apps that do something like this:
+Many platforms have CSRF token support built in, so check your platform and
+see what's available. For express, [csurf](https://github.com/expressjs/csurf)
+is an excellent library for CSRF token suport.
 
-```js
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
-```
+"[Double submit cookies](https://medium.com/cross-site-request-forgery-csrf/double-submit-cookie-pattern-65bb71d80d9f)"
+is a technique very similar to CSRF if you're looking for something stateless.
 
-That second line looks so harmless, but it enables decoding
-"application/x-www-form-urlencoded" on all inbound routes. And once you enable
-that, once your API on the server side accepts bodies encoded with "application/x-www-form-urlencoded", then evilcorp.com can build their form.
+Special care is needed here if your website is on a subdomain, and other websites
+are available on other subdomains under the same domain.  For example if your
+website is "bank.myfreehosts.com" and someone else can create a website at
+"test.myfreehosts.com", either one of your sites can create cookies for
+"myfreehosts.com", so you need to be careful that the cookie you're reading is
+really the one you set.  In these cases, make sure your cookie is encrypted
+with a secret only your server knows.
 
-If you are writing an app that uses progressive enhancement - in other words
-an app that works when JavaScript is disabled, then you have to accept these
-form-encoded inputs.  You don't have a choice, because that's all a browser can
-generate.  In this case, there are other methods you can use to protect yourself
-which we will discuss below.  If you're building a website that requires
-JavaScript to operate, though, then one option is to simply not accept any
-request with a content-type of "application/x-www-form-urlencoded",
-"multipart/form-data", or "text/plain" in the first place, and you won't be
-vulnerable to this.
+## CSRF Tokens and non-browser API clients
 
-One thing especially to watch for - if you have an endpoint that doesn't expect
-a body (say an endpoint for marking a post as "seen", where the ID of the post
-is in the URL, so you don't need anything in the body), make sure these
-endpoints return a 400 if there's an unexpected body, otherwise they may be
-vulnerable.
+One problem with CSRF tokens is that they only work for visitors to your website.
+If your API is intended to be consumed by a mobile app or a third party application,
+then these applications will not have access to the CSRF token, so will be unable
+to use your API.
+
+There are a few ways around this.  First, note that really only POST requests
+with a content-type of "application/x-www-form-urlencoded",
+"multipart/form-data", or "text/plain" need a CSRF token, because of the
+same origin policy.  So you could not require a CSRF token for posts with a
+content-type of "application/json" (although some would caution against relying
+on content-type as your
+[only layer of protection against CSRF](https://www.nccgroup.com/us/about-us/newsroom-and-events/blog/2017/september/common-csrf-prevention-misconceptions/)).
+Also, if you are using this strategy, pay special attention to endpoints which
+do not require a body.  For example, suppose you have an endpoint for marking a
+post as "seen", where the ID of the post is in the URL and you don't have a body
+at all.  Make sure these endpoints return a 400 if there's an unexpected body,
+otherwise they may be vulnerable.  Also, if you are using express, beware of
+`bodyParser.urlencoded()`.  Putting this high up in your middleware stack will
+make it so all your endpoints accept "application/x-www-form-urlencoded"
+POST requests.
+
+Another key thing to note is that we're trying to protect against cross-site
+request forgery, which relies on the fact that the browser is sending
+authentication data in a cookie even though a request came from another site.
+Basic and digest authentication are also possible vectors for CSRF, as the browser
+will send credentials automatically with each request until the session ends.
+If a request is authenticated with an "Authentication: Bearer" header, though,
+or with a custom header, then a CSRF token is not required, as bearer tokens
+must be set explicitly, and custom headers cannot be sent without JavaScript
+and thus would be protected by the same origin policy.
+
+## Check the origin header
+
+This is perhaps the simplest method of preventing CSRF attacks; if you know what
+the origin header is supposed to be, check the origin header on your server.
+All browsers will insert an origin header for cross-domain requests. Just note
+that browsers (and non-browser clients such as a mobile apps) will not insert an
+origin header for "same origin" requests, so you should allow requests with no
+origin header.
 
 ## Don't disable the same origin policy
 
@@ -178,7 +211,7 @@ Except, when we try this, whenever our client tries to PUT or POST or DELETE,
 you get back a 403. And when we look in our server logs, all we see is a
 bunch of OPTIONS requests. What's is going on?
 
-It turns out, we've fallen victim to our friend the "same origin policy".
+It turns out we've fallen victim to our friend the "same origin policy".
 "www.awesomebank.com" and "api.awesomebank.com" are, in fact, two different
 origins, so when a script from one tries to POST with content-type
 "application/json" to the other, the browser does what's called a "Cross Origin
@@ -227,7 +260,7 @@ around with IMG tags or forms, they can write a script tag like this:
 
 Same origin policy _would have_ prevented this, but we disabled it, so now
 evilcorp can steal all our clients' money, yet again. (Hope we have good
-insurance.)
+insurance!)
 
 To protect against this; if you do need to allow cross-domain requests, instead
 of allowing access to "\*", pick a whitelist of origins that are allowed to
@@ -249,14 +282,17 @@ package, which will let you whitelist a specific origin, or even let you call a
 function to check an origin dynamically. (But make sure you pass in an `origin`
 option, because sadly the default here is to allow any origin.)
 
+Notice that a CSRF token would have protected us here, too, if we applied it to
+all content-types.
+
 ## Write negative test cases
 
 When you're writing test cases for your API, CSRF attacks are often overlooked.
-But I've seen a junior developer check in a change with THE comment
+But I've seen a junior developer check in a change with the comment
 "We keep seeing these OPTIONS requests failing in the logs. Not sure what these
 are, but let's clean up the errors by just always returning 200 for OPTIONS."
 
-If you're familiar with how CORS works, that's a pretty face-palm worth sort of
+If you're familiar with how CORS works, that's a pretty face-palm worthy sort of
 change.
 
 Write some test cases that try sending an OPTIONS request to your API with an
@@ -270,52 +306,6 @@ Once you've read this article, you know the "rules" for safely handling
 these requests, but don't assume everyone who works on your code base will (or
 even that you'll remember them a year after reading this); make the rules
 explicit with tests.
-
-## CSRF Tokens
-
-Let's say you want to write a web page that will work, even if JavaScript is
-completely disabled. In this case, you need to write an API that accepts data
-using "application/x-www-form-urlencoded" encoding. There's no helping it,
-because this is all a browser can generate without JavaScript.  How do you
-secure this endpoint against CSRF attacks?
-
-One way to secure yourself here is to use something called a CSRF token.
-The basic idea is to generate a random token and store it in your user session,
-then make it so the CSRF token is either submitted by forms in a hidden field
-or added as an extra "x-csrf-token" header in each API call. Server side, you
-can check to make sure the CSRF token matches the one stored in the session.
-Since it should be impossible for an attacker to get the CSRF token (the same
-origin policy _does_ protect javascript from reading the contents of a response)
-it makes it much more difficult for an attacker.
-
-Many platforms have CSRF token support built in, so check your platform and
-see what's available. For express, [csurf](https://github.com/expressjs/csurf)
-is an excellent library for CSRF token suport.
-
-Note that you only really need CSRF tokens for what [CORS calls "simple requests"](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#Examples_of_access_control_scenarios);
-for example a GET, or a POST with a content-type of "application/x-www-form-urlencoded",
-"multipart/form-data", or "text/plain". If you're POSTing "application/json"
-data, then you're already safe because of the same origin policy.
-
-"[Double submit cookies](https://medium.com/cross-site-request-forgery-csrf/double-submit-cookie-pattern-65bb71d80d9f)" is a technique very similar to CSRF
-if you're looking for something stateless.
-
-Special care is needed here if your website is on a subdomain, and other websites
-are available on other subdomains under the same domain.  For example if your
-website is "bank.myfreehosts.com" and someone else can create a website at
-"test.myfreehosts.com", either one of your sites can create cookies for
-"myfreehosts.com", so you need to be careful that the cookie you're reading is
-really the one you set.  In these cases, make sure your cookie is encrypted
-with a secret only your server knows.
-
-## Check the origin header
-
-This is perhaps the simplest method of preventing CSRF attacks; if you know what
-the origin header is supposed to be, check the origin header on your server.
-All browsers will insert an origin header for cross-domain requests. Just note
-that browsers (and non-browser clients such as a mobile apps) will not insert an
-origin header for "same origin" requests, so you should allow requests with no
-origin header.
 
 ## Use SameSite cookies
 
@@ -359,6 +349,14 @@ Set-Cookie: session=blahblahblah; SameSite=None
 as future browsers may start treating a missing "SameSite" directive the
 same as "Lax" by default in the near future.
 
+## Require re-authentication for especially destructive operations
+
+If you have an especially destructive operation, such as deleting an account
+or sending all of your money to the Cayman Islands, consider requiring your user
+to re-authenticate.  If the password is a required field in the request, then
+a CSRF attack can't succeed, since the attacking website has no way of knowing
+the user's password.
+
 ## Summary
 
 To wrap up:
@@ -366,7 +364,8 @@ To wrap up:
 * Never modify state in a GET request.
 * If you can, don't accept content-types of "application/x-www-form-urlencoded", "multipart/form-data", or "text/plain".
 * If you have to accept these content types, use a CSRF token or double submit
-  cookie.
+  cookie.  Even if you're just using application/json, consider requiring a CSRF
+  token, because being overly cautious is better than not.
 * If you know what origin requests are supposed to come from, check the
   origin header on the server.
 * If you don't need to do cross-site requests, use SameSite cookies.
