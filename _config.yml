@@ -29,7 +29,8 @@ defaults:
       author: "Jason Walton"
       layout: "post"
 
-gems:
+plugins:
   - jemoji
   - jekyll-redirect-from
   - jekyll-sitemap
+  - jekyll-paginate
