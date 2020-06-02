@@ -13,10 +13,10 @@ mostly just by being careful about how you design your API.
 
 <!--more-->
 
-The basic idea behind a CSRF attack is that one of your users uses their browser
-to log into your website (let's say "awesomebank.com" as an example), and then
-they visit a malicious website with the same browser, and that malicious website
-sends a request to your website. In certain cases, the browser will send
+The basic idea behind a CSRF attack is this; you have a user that uses their browser
+to login to your website (let's say "awesomebank.com" as an example).  Now that
+same user uses the same browser to visit a malicious website, and that malicious
+website sends a request to your website. In certain cases, the browser will send
 cookies for your website along with that request, even though it came from the
 malicious website. From your server's perspective, you get an API call from
 an authenticated user, so you'll probably end up doing what the malicious site
