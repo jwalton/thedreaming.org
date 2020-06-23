@@ -91,6 +91,11 @@ export async function getBrowser() {
         headless: false,
       });
     }
+
+    // If the browser disconnects, create a new browser next time.
+    browser.on("disconnected", () => {
+      browser = undefined;
+    });
   }
 
   return browser;
@@ -363,5 +368,5 @@ $ BROWSERLESS_URL=ws://localhost:3100?token=2cbc5771-38f2-4dcf-8774-50ad51a971b8
 And now if we try to hit up our endpoint, we should once again see a screenshot
 of our app!
 
-Hopefully this was helpful!  If you try this out, or have a similar (or better!)
+Hopefully this was helpful! If you try this out, or have a similar (or better!)
 soltuion, let me know in the comments!
