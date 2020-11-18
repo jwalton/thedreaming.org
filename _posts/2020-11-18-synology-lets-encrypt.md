@@ -107,6 +107,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # Can't use default key-type ec256 with Synology.
 lego --key-type rsa4096 --accept-tos \
+  --path="${DIR}/.lego" \
   --dns="route53" \
   --email="${LE_EMAIL_ADDRESS}" \
   --domains="${LE_DOMAIN}" \
@@ -194,6 +195,7 @@ source "${DIR}/config.sh"
 
 # Can't use default key-type ec256 with Synology.
 lego --key-type rsa4096 --accept-tos \
+  --path="${DIR}/.lego" \
   --dns="route53" \
   --email="${LE_EMAIL_ADDRESS}" \
   --domains="${LE_DOMAIN}" \
