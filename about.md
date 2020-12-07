@@ -4,4 +4,4 @@ title: About
 permalink: /about/
 ---
 
-Jason Walton is a software developer at Benbria, in Ottawa, Ontario, Canada.
+Jason Walton is a software developer at [Solink](https://solink.com/), in Ottawa, Ontario, Canada.
