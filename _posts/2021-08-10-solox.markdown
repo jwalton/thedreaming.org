@@ -1,0 +1,263 @@
+---
+title: "An immutable version of MobX: SoloX"
+tags:
+  - React
+  - JavaScript
+---
+
+In this post, we're going to develop [a state management library for React](https://github.com/jwalton/solox), which is similar in many ways to the popular MobX library, but which uses immutable data structures. The upside is that this library is increadibly small and easy to use, and you don't need to worry about wrapping your React components with `observer` higher-order components. The biggest downside is that you need to be a bit more explicit about when you want to update state, but thanks to the [immer library](https://immerjs.github.io/immer/), updates will still be done as if the state is a regular mutable javascript object.
+
+<!--more-->
+
+## State Management
+
+Managing state in a React application is one of the most important parts of the application, but is often overlooked. One rule of thumb when dealing with state is to keep the state as close as you can to the component that needs it. When you have a very simple react component, you can store some state about that component using `state` or using the `useState()` hook:
+
+```ts
+export const Toggle: React.FC<unknown> () {
+  const [ toggled, setToggled ] = useState(false);
+  return <button onClick={() => setToggled(!toggled)}>{ toggled ? 'On' : 'Off' }</button>
+}
+```
+
+If you have some state that needs to be shared between two components, you can store that state in a common ancestor, and then pass it down to each component as `props`.
+
+When we start getting into more complicated state, with a lot of business logic governing how that state is updated, this can quickly get out of hand. One widely used solution to this problem is to move state into a state management library like [redux](https://redux.js.org/) or [zustand](https://github.com/pmndrs/zustand). These libraries typically treat state as a "global" thing, with a single global store storing state for the whole application. This violates our "keep state as close as you can to where you use it" principal. For all but the most complicated apps, libraries like these can frequently be overkill, and some (_cough_ redux) introduce significant boilerplate.
+
+Sometimes, we want something inbetween - something self contained that manages state and actions, but which isn't global. In the MVC paradigm, this would be the "model" and the "controller". You can come up with a "controller" component with a bunch of `useState()`s to define some state and `useCallback()`s to create actions to update that state. This works reasonably well, but has the serious downside that in order to unit test such a thing, you need to render the controller component, which means you need React and either need JSDom or need to run your tests in a browser.
+
+[MobX](https://mobx.js.org/) is an excellent state library which allows you to create an instance of a "store" anywhere and use it locally. If you're starting a new project from scratch, then MobX should be on your short list for state management. One downside to MobX however is that is uses mutable state, so any components that make use of a MobX store need to be wrapped in an `observer` higher-order-component. In an existing project, this can cause problems, because MobX starts "infecting" your non-MobX components, and if you miss an `observer` somewhere you can spend time chasing down components that don't re-render when you expect them to. What we want is something like MobX, but that uses immutable state, so we can just drop it into an existing project.
+
+In this post, we're going to write exactly such a library from scratch - a poor-man's MobX, or perhaps a "MobX superlegerra". We'll call this library "[SoloX](https://github.com/jwalton/solox)".
+
+What we want is:
+
+- Some immutable state - the "model".
+- Some actions that we can call from our react components that replace that state with updated state - the "controller".
+- Some way to get a React component to re-render when all or part of the state updates.
+
+## Immer
+
+We're going to use the excellent [immer library](https://immerjs.github.io/immer/) to handle the immutable part of this for us; it's easy to use, and we will be able to write "actions" that just edit state as if it were mutable state. If you've never used immer before, immer has this handy `produce(state, recipe)` function. `produce()` takes an immutable `state` object, and a `recipe` function that looks like it's mutating state directly, but actually what's going on is that immer has created a `proxy` for our state, and is recording what updates we make. Immer produces a new immutable object with those edits applied. Here's a quick example:
+
+```ts
+const oldState = { age: 7 };
+
+const newState = produce(oldState, (state) => {
+  state.age++;
+});
+
+console.log(oldState.age); // 7
+console.log(newState.age); // 8
+```
+
+## SoloX
+
+First of all, we're going to define a new `ImmutableModelStore` class, which is going to hold some state and make it easy to update it:
+
+```ts
+export class ImmutableModelStore<S> {
+  /** The current state for this store. */
+  public current: Immutable<S>;
+
+  constructor(initialState: S) {
+    this.current = produce(initialState, () => void 0) as Immutable<S>;
+  }
+
+  /**
+   * update will synchronously update the state of the model.
+   *
+   * The `fn` passed in must be a synchronous function.  It will be passed a
+   * mutable version of the state, which can be edited directly.  Updates will
+   * be applied when `fn` returns.
+   */
+  public update(fn: (state: Draft<S>) => void): void {
+    this.current = produce(this.current, (state: Draft<S>) => {
+      fn(state);
+    }) as Immutable<S>;
+  }
+}
+```
+
+This is pretty simple - in the constructor, we're passing the initial state through `immer` to make it read only, and then users can call `update()` to update the state. Now let's use this to create a "controller". Borrowing from the [MobX tutorial](https://mobx.js.org/getting-started.html):
+
+```ts
+interface Task {
+  task: string;
+  completed: boolean;
+  assignee: string | null;
+}
+
+interface TodosState {
+  todos: Task[];
+}
+
+class TodoController {
+  // Create our "model".
+  public state = new ImmutableModelStore<TodosState>({ todos: [] });
+
+  // Generate derived state from the model.
+  get completedTodosCount() {
+    return this.state.current.todos.filter((todo) => todo.completed === true)
+      .length;
+  }
+
+  // An action to add a new todo.
+  addTodo(task: string) {
+    this.state.update((state) => {
+      state.todos.push({
+        task,
+        completed: false,
+        assignee: null,
+      });
+    });
+  }
+}
+
+const todoController = new TodoController();
+```
+
+And now we have a controller/store with actions and computed values, just like a MobX store. But crucially, the store's state is immutable, so we can just pass that state straight to a React component as a prop, and the component will update whenever the state changes. Well... almost.
+
+How do we pass this to a React component? If we create a new controller inside a component, and pass the controller down as a prop, the controller itself will never change, so child components will never re-render. If we pass down `controller.state.current` as a prop, then the child will re-render whenever the state updates, but we need some way to trigger that "top level" component that created the controller to re-render. What we want here is a `useControllerState()` hook that lets us "select" state from the controller, and will trigger a re-render whenever state updates. That way a component will only re-rerender when selected values change. In order for this to work, we need some way to "subscribe" to our state. Let's update our `ImmutableModelStore` class to add the ability to subscribe to changes:
+
+```ts
+export class ImmutableModelStore<S> {
+  public current: Immutable<S>;
+  private _subscribers: ((newValue: Immutable<S>) => void)[] = [];
+
+  constructor(initialState: S) {
+    this.current = produce(initialState, () => void 0) as Immutable<S>;
+  }
+
+  /** ... */
+  public update(fn: (state: Draft<S>) => void): void {
+    this.current = produce(this.current, fn) as Immutable<S>;
+  }
+
+  /**
+   * Subscribe to changes in this store's state.
+   *
+   * @param subscriber The function to call when the state changes.
+   * @returns a function to call to unsubscribe.
+   */
+  public subscribe(subscriber: (newState: Immutable<S>) => void): () => void {
+    this._subscribers.push(subscriber);
+
+    return () => {
+      this._subscribers = this._subscribers.filter((s) => s !== subscriber);
+    };
+  }
+}
+```
+
+Note this is almost identical to the class in `SoloX` - the "real" one has some extra error checking, and has a trick to allow re-rentrant/nested calls into `update()`, but otherwise it's the same. And now we can write our hook:
+
+```ts
+export function useControllerState<S>(store: ImmutableModelStore<S>) {
+  const [result, setResult] = useState<Immutable<S>>(store.current);
+
+  useEffect(() => {
+    const unsubscrube = store.subscribe(setResult);
+    return () => unsubscrube(setResult);
+  }, [store]);
+
+  return result;
+}
+```
+
+This hook uses a `useControllerState()` to keep track of the current state in `result`, and then uses a `useEffect()` hook to subscribe to the ImmutableModelStore and update the `result` as required. Let's make this slightly fancier - it would be nice if we could "select" certain values from the state, and only re-render if they change similar to redux's `useSelector()`. Doing this correctly is a bit more complicated, but here's the full function:
+
+```ts
+/**
+ * Returns a ref to the passed in object that updates whenever the passed in object
+ * changes.  This is handy when you want to create a callback, and you don't want
+ * the callback to change because a value it depends on changes.
+ *
+ * @returns [ref, changed]
+ */
+function useLatest<T>(thing: T): [React.MutableRefObject<T>, boolean] {
+  const ref = useRef<T>(thing);
+  const changed = ref.current !== thing;
+  ref.current = thing;
+  return [ref, changed];
+}
+
+function defaultSelector<S, R>(state: Immutable<S>): R {
+  return state as any as R;
+}
+
+function defaultIsEqual<R>(oldState: R, newState: R): boolean {
+  return oldState === newState;
+}
+
+export function useControllerState<S, R = Immutable<S>>(
+  store: ImmutableModelStore<S>,
+  selector?: (state: Immutable<S>) => R,
+  isEqual?: (oldState: R, newState: R) => boolean
+) {
+  // Keep track of the "latest" selector and isEqual so we don't have to
+  // unsubscribe/resubscribe if they change.
+  const [latestSelector, selectorChanged] = useLatest(
+    selector || defaultSelector
+  );
+  const [latestIsEqual] = useLatest(isEqual || defaultIsEqual);
+
+  // Hold the selected result in a ref - if the selector changes, we want to update
+  // the result without forcing another re-render.
+  const resultRef = useRef<R>(latestSelector.current(store.current));
+
+  // The currently selected state, used to force a re-render.
+  const [, setResult] = useState<R>(() =>
+    latestSelector.current(store.current)
+  );
+
+  // If the selector changes, may need to update the selected result.
+  if (selectorChanged) {
+    const newResult = latestSelector.current(store.current);
+    if (!latestIsEqual.current(resultRef.current, newResult)) {
+      resultRef.current = newResult;
+    }
+  }
+
+  // Update resultRef and force a re-render if the store changes.
+  useEffect(() => {
+    const unsubscribe = store.subscribe((state: Immutable<S>) => {
+      const newResult = latestSelector.current(state);
+      if (!latestIsEqual.current(resultRef.current, newResult)) {
+        resultRef.current = newResult;
+        setResult(newResult);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [latestIsEqual, latestSelector, store]);
+
+  return resultRef.current;
+}
+```
+
+And finally we can put this all together into a React component:
+
+```ts
+const MyComponent: React.FC<{ controller: TodoController }> = (props) => {
+  const { todos } = useControllerState(controller.state);
+
+  // Note that we need to use useControllerState to access computed values, too.
+  const completedTodosCount = useControllerState(
+    controller.state,
+    () => controller.completedTodosCount
+  );
+
+  return (
+    <div>
+      <ul>
+        {todos.map((todo, index) => (
+          <li id={index}>{todo.task}</li>
+        ))}
+      </ul>
+      Completed: {completedTodosCount}
+    </div>
+  );
+};
+```
