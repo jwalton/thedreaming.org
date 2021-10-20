@@ -73,7 +73,7 @@ All YAML descriptors in Kubernetes have an `apiVersion`, `kind`, `metadata`, and
 - `metadata` contains data about this resource - in the case the name of the pod, and some labels.
 - `spec` describes the details of what we're trying to create - here we specify the pod has one container, where to find the image for the container, and a list of ports that the container exposes.
 
-In the "metadata" section, "labels" are free-form metadata you can attach to any object in Kubernetes - you can set whatever labels you like on a resource. You might specify an "app: front-end" to specify this is the front-end part of your application, or you might specify that this deployment is part of "env: prod". It's entirely up to you. You can use "selectors" in Kubernetes to pick a subset of resources - to find all the pods that are part of "env: prod" for example. Frequently the metadata section will also contain "annotations" - we'll talk more about those in the next part of this tutorial when we talk about "Ingress".
+In the "metadata" section, "labels" are free-form metadata you can attach to any object in Kubernetes - you can set whatever labels you like on a resource. You might specify an "app: front-end" to specify this is the front-end part of your application, or you might specify that this deployment is part of "env: prod". It's entirely up to you. You can use "selectors" in Kubernetes to pick a subset of resources - to find all the pods that are part of "env: prod" for example. Frequently the metadata section will also contain "annotations" - we'll talk more about those in the [next part of this tutorial](http://www.thedreaming.org/2021/10/21/kubernetes-for-developers-part-2/) when we talk about "Ingress".
 
 Once we write this to `pod.yaml`, we can create this pod with:
 
@@ -288,7 +288,7 @@ root@bash:/# curl http://gameservice/
 root@bash:/# curl http://gameservice.default.svc.cluster.local/
 ```
 
-This provides us with a powerful way to link our applications together - each application can find services it wants to interact with just by looking up the service via DNS. Note that we can connect to the service via a fully qualified domain name like "gameservice.default.svc.cluster.local" ("default" here is the namespace we are currently running it - we'll talk more about namespaces in part 2), or we can just use the "gameservice" domain name to find the one running in the local namespace. This works because Kubernetes automatically configures a search path in /etc/resolv.conf.
+This provides us with a powerful way to link our applications together - each application can find services it wants to interact with just by looking up the service via DNS. Note that we can connect to the service via a fully qualified domain name like "gameservice.default.svc.cluster.local" ("default" here is the namespace we are currently running it - we'll talk more about namespaces in [part two](http://www.thedreaming.org/2021/10/21/kubernetes-for-developers-part-2/)), or we can just use the "gameservice" domain name to find the one running in the local namespace. This works because Kubernetes automatically configures a search path in /etc/resolv.conf.
 
 We can also create services for resources that aren't in Kubernetes:
 
@@ -313,14 +313,36 @@ If our pod's container writes output to stdout, sometimes it's handy to see the 
 kubectl logs [podname]
 ```
 
-Our "2048" pods don't print any output, so the logs are empty.  Note that once a pod is restarted or deleted, all the logs are lost.  "fluentd" is a popular log aggregator that can fetch logs from all your deployments and collect them together for you.
-
-We can also get a shell on an existing pod with `kubectl exec`:
+Our "2048" pods don't print any output, so the logs are empty.  Let's start a redis container so we can see some logs:
 
 ```sh
-kubectl exec -it [podname] -- sh
+$ kubectl run redis --image=redis:latest
+pod/redis created
+
+$ kubectl logs redis
+1:C 20 Oct 2021 19:57:03.787 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+1:C 20 Oct 2021 19:57:03.787 # Redis version=6.2.6, bits=64, commit=00000000, modified=0, pid=1, just started
+1:C 20 Oct 2021 19:57:03.787 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
+1:M 20 Oct 2021 19:57:03.788 * monotonic clock: POSIX clock_gettime
+...
 ```
 
-## Wrapping Up
+If we want to watch logs in realtime, then similar to the `tail -f` command, we can use the "-f" flag to tail the logs.  The "--since" will limit the output to recent output.  So this command will print all logs from the last 10 minutes, then keep showing logs as they come in:
 
-That's it for part 1 of this tutorial - we learned about kubectl, we learned how to create pods, deployments, and services. We learned how to get a shell inside the cluster, and we learned about service discovery through DNS. In part 2, we'll look at how to create a cluster in AWS using `eksctl` and how to forward traffic from the Internet to one or more of our services via an "Ingress".
+```sh
+$ kubectl logs -f --since=10m redis
+...
+```
+
+The `--previous` flag is also handy - this shows logs from a previous instance of pod.  Handy when a pod crashes or restarts, and you want to see the error that caused it to die.  "fluentd" is a popular log aggregator that can fetch logs from all your deployments and collect them together for you.
+
+One last thing that's handy for troubleshooting an existing pod; you can get a shell on an existing pod with `kubectl exec`:
+
+```sh
+$ kubectl exec -it redis -- sh
+#
+```
+
+## Conclusion
+
+That's it for part one of this tutorial - we learned about kubectl, we learned how to create pods, deployments, and services. We learned how to get a shell inside the cluster, and we learned about service discovery through DNS. In [part two](http://www.thedreaming.org/2021/10/21/kubernetes-for-developers-part-2/), we'll look at how to create a cluster in AWS using `eksctl` and how to forward traffic from the Internet to one or more of our services via an "Ingress".
