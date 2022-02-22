@@ -13,9 +13,27 @@ You want to install an npm package - let's say `amqp-connection-manager`.  This 
 
 First, a quick explanation of "semantic versioning".  Node.js packages have version numbers like "5.3.2".  Here "5" is called the major version, "3" is the minor version, and "2" is the patch version.  When a new version of a package comes out, it should increment the major version if there are breaking changes.  If not, it should upgrade the minor version if there are new features, or the patch version if there are only bug fixes.  This means you know it should be reasonably safe to upgrade from 5.3.2 to 5.3.3 (since this only contains bug fixes) or to 5.4.0 (which has some new features, and maybe some bug fixes) but upgrading to 6.0.0 means breaking changes and you'll probably have to do some work to do that upgrade.  "0.x.y" versions are special; here the "x" is usually treated as the major version, and the "y" as the "minor/patch" version.
 
-If you peer into the [package.json for amqp-connection-manager](https://github.com/jwalton/node-amqp-connection-manager/blob/890497dd54587f6ad4e4f082fd956baa31de3cbf/package.json#L19), you'll see that it relies on `"promise-breaker": "^5.0.0"`.  Notice the `^` (called a "caret") - this is important! The [caret](https://docs.npmjs.com/cli/v6/using-npm/semver#caret-ranges-123-025-004) means that this package relies on 5.0.0, or any version higher than 5.0.0 with a "5" in the major version number.  This means if you already have promise-breaker 5.1.0 installed when you try to install amqp-connection-manager, npm won't install 5.0.0, it will just use the 5.1.0 you already have installed.  And, this also means if a new 5.x.x version of promise-breaker comes out, you can upgrade to it without upgrading amqp-connection-manager.
+If you peer into the [package.json for amqp-connection-manager](https://github.com/jwalton/node-amqp-connection-manager/blob/890497dd54587f6ad4e4f082fd956baa31de3cbf/package.json#L19), you'll see that it relies on:
 
-The caret also correctly interprets versions with a leading 0 - `^0.1.2` means this depends on 0.1.x for any x >= 2.
+```json
+  "dependencies": {
+        "promise-breaker": "^5.0.0"
+  }
+```
+
+Notice the `^` (called a "caret") - this is important! The [caret](https://docs.npmjs.com/cli/v6/using-npm/semver#caret-ranges-123-025-004) means that this package relies on 5.0.0, or any version higher than 5.0.0 with a "5" in the major version number.  This means if you already have promise-breaker 5.1.0 installed when you try to install amqp-connection-manager, npm won't install 5.0.0, it will just use the 5.1.0 you already have installed.  And, this also means if a new 5.x.x version of promise-breaker comes out, you can upgrade to it without upgrading amqp-connection-manager.
+
+The caret also correctly interprets versions with a leading 0 - `^0.1.2` means this depends on 0.1.x for any x >= 2.  Sometimes you will also see [tilde ranges](https://docs.npmjs.com/cli/v6/using-npm/semver#tilde-ranges-123-12-1) like `~5.2.1`.  These are very similar to caret ranges - in most cases you can use them interchangably.
+
+If you find a package that doesn't have a caret or tilde range, for example if you find a package that contains something like:
+
+```json
+  "dependencies": {
+        "promise-breaker": "5.0.0"
+  }
+```
+
+Then you're in trouble.  There's ways to force npm or yarn to upgrade to a higher version, but the best way to resolve this is to raise a PR against the package that's importing promise-breaker, and get them to upgrade (and preferably get them to replace "5.0.0" with caret or tilde range).
 
 ## Upgrading with npm
 
