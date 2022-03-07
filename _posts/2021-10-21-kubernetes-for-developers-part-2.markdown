@@ -4,7 +4,7 @@ tags:
   - Kubernetes
 ---
 
-In [part one](http://www.thedreaming.org/2021/10/20/kubernetes-for-developers-part-1/), we created a service and we learned how to connect to our service from inside the cluster, and how to connect to it from outside the cluster with with port forwarding - how would we go about exposing this service on the Internet?
+In [part one](/2021/10/20/kubernetes-for-developers-part-1/), we created a service and we learned how to connect to our service from inside the cluster, and how to connect to it from outside the cluster with with port forwarding - how would we go about exposing this service on the Internet?
 
 The answer is a Kubernetes resource called an Ingress, which describes how traffic gets into your cluster and which services traffic gets routed to. There are lots of different kinds of Ingress to choose from - you get to pick one and install it on your cluster. What an Ingress looks like in terms of network architecture will depend very much on which Ingress you choose.
 
@@ -87,7 +87,7 @@ Be careful with this command - it goes without saying that deleting your product
 
 ## What happened to minikube?
 
-If you started this tutorial in [part one](http://www.thedreaming.org/2021/10/20/kubernetes-for-developers-part-1/), you noticed that `kubectl` was controlling your minikube cluster, but now it's controlling your EKS cluster! What happened to minikube?
+If you started this tutorial in [part one](/2021/10/20/kubernetes-for-developers-part-1/), you noticed that `kubectl` was controlling your minikube cluster, but now it's controlling your EKS cluster! What happened to minikube?
 
 If you have a look in ~/.kube/config, you'll see that kubectl now knows about two different clusters, and has authentication credentials for both of them. Kubectl has a concept called a "context" - at any given point you are in a particular context, controlling a particular cluster. You can see a list of contexts:
 
@@ -158,7 +158,7 @@ A quick aside here about helm - we just ran some Helm commands. We're going to t
 
 ## Ingress
 
-We're finally ready to create an ingress! Let's update the `2048.yaml` file we created in [part one](http://www.thedreaming.org/2021/10/20/kubernetes-for-developers-part-1/):
+We're finally ready to create an ingress! Let's update the `2048.yaml` file we created in [part one](/2021/10/20/kubernetes-for-developers-part-1/):
 
 ```yaml
 # 2048.yaml
@@ -217,7 +217,7 @@ spec:
              servicePort: http
 ```
 
-If you followed along from [part one](http://www.thedreaming.org/2021/10/20/kubernetes-for-developers-part-1/) of the tutorial, the `Deployment` and `Service` should be familiar. We did make a small change here - the Service used to be `type: ClusterIP`, which meant the service was given an IP address that could only be reached from inside the cluster. Instead we've now specified `type: NodePort` - this means that a port will be opened on each node in the cluster to allow access to this service from outside the cluster. This is required to work with the AWS load balancer controller.
+If you followed along from [part one](/2021/10/20/kubernetes-for-developers-part-1/) of the tutorial, the `Deployment` and `Service` should be familiar. We did make a small change here - the Service used to be `type: ClusterIP`, which meant the service was given an IP address that could only be reached from inside the cluster. Instead we've now specified `type: NodePort` - this means that a port will be opened on each node in the cluster to allow access to this service from outside the cluster. This is required to work with the AWS load balancer controller.
 
 The "Ingress" at the bottom is the new part. The `metadata` for the ingress contains an `annotation`: `kubernetes.io/ingress.class: "alb"`. Annotations are basically free-form strings, like labels, but they're used to set "extra" configuration on a resource - configuration that's used by some Kubernetes controller or operator, but which isn't part of the official `spec`. You could have multiple different kinds of ingress controllers configured on the same Kubernetes cluster, so the AWS load balance controller, by default, will ignore any Ingress resources that don't have this annotation. Put another way, this annotation marks this Ingress as one that the AWS load balancer controller controller should pay attention to. You can see a list of all the annotations that the AWS Load Balancer Controller supports [in the documentation](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/guide/ingress/annotations).
 
@@ -331,7 +331,7 @@ If you run the above command and use the "minikube-dev" context, then when you i
 
 We can now access our service through the ALB, but it would be nice if we could access the service through a domain name. You could manually configure CNAME records to point to the ALB, but it would be nice if we could get Kubenetes to automatically update our DNS records every time we bring up or update an ingress. The tool we're going to use to do this is a service called `external-dns`, which like the AWS Load Balancer Controller, we're going to run on our cluster. In order to do this, first you'll have to register a domain name. external-dns [supports many DNS registries](https://github.com/kubernetes-sigs/external-dns#deploying-to-a-cluster), but for the purposes of this tutorial we're going all in on AWS, and we're going to use Route 53.
 
-If you already have a domain name and hosted zone, you can use them - we'll add a new subdomain and won't touch any of the existing records. Otherwise you'll need to log into the AWS management console, and go to [Route53](https://console.aws.amazon.com/route53/v2/home#Dashboard), go to "Registered domains" and register a new domain name, then go to "Hosted Zones" and create a new zone. Either way, once you have a hosted zone, click on it in the management console, expand the "Hosted zone details" at the top, and note the "Hosted zone ID". For the sake of this example, let's pretend you've registered "thedreaming.org" as your domain name.
+If you already have a domain name and hosted zone, you can use them - we'll add a new subdomain and won't touch any of the existing records. Otherwise you'll need to log into the AWS management console, and go to [Route53](https://console.aws.amazon.com/route53/v2/home#Dashboard), go to "Registered domains" and register a new domain name, then go to "Hosted Zones" and create a new zone. Let's pretend you've registered "thedreaming.org" as your domain name.
 
 To install external-dns, you can follow along with the [official installation instructions for external-dns](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md), but Bitnami has a nice [Helm chart](https://github.com/bitnami/charts/tree/master/bitnami/external-dns/) that will install external-dns for us, so for simplicity's sake we'll use it here:
 
@@ -343,12 +343,12 @@ $ helm upgrade --install external-dns --dry-run \
   --set aws.zoneType=public \
   --set serviceAccount.create=false \
   --set serviceAccount.name=external-dns \
-  --set txtOwnerId=HOSTED_ZONE_IDENTIFIER \
-  --set "domainFilters[0]"=HOSTED_ZONE_NAME \
+  --set txtOwnerId=UNIQUE_ID_HERE \
+  --set "domainFilters[0]"=DOMAIN_NAME \
   bitnami/external-dns
 ```
 
-Replace `HOSTED_ZONE_IDENTIFIER` with the "Hosted zone ID" you noted down earlier. Replace `HOSTED_ZONE_NAME` with the name of your domain (e.g. "thedreaming.org") - this will get external-dns to only modify records for this domain name and no others.  You can use `domainFilters` in a case where you're being extra paranoid - let's say you work for "bigcorp.com", and you want to make extra sure no one accidentally reconfigures the DNS records for "www.bigcorp.com" - you could create a "k8s.bigcorp.com" subdomain and set this to the "domainFilters". The external-dns would be able to update "k8s.bigcorp.com" and any subdomain of "k8s.bigcorp.com", but would refuse to try to setup anything outside that subdomain.
+Replace `UNIQUE_ID_HERE` with some unique ID that won't change over the life of your cluster (the cluster name, for example) - external-dns will set this on each record it creates so it can figure out which domain names it "owns". If you have multiple clusters that all create records in the same hosted zone, make sure the txtOwnerId is different in each cluster, otherwise they may clobber each other's records.  Replace `DOMAIN_NAME` with the name of your domain (e.g. "thedreaming.org") - this will get external-dns to only modify records for this domain name and no others.  You can use `domainFilters` in a case where you're being extra paranoid - let's say you work for "bigcorp.com", and you want to make extra sure no one accidentally reconfigures the DNS records for "www.bigcorp.com" - you could create a "k8s.bigcorp.com" subdomain and set this to the "domainFilters". The external-dns would be able to update "k8s.bigcorp.com" and any subdomain of "k8s.bigcorp.com", but would refuse to try to setup anything outside that subdomain.
 
 You can run:
 
@@ -412,4 +412,4 @@ In the AWS management console, you should see a new A record has been created fo
 
 ## Conclusion
 
-In part two of this tutorial we learned how to bring up a cluster in AWS, we learned a bit about security, and we learned about how to set up an Ingress to bring traffic into our cluster.  In part three we're going to learn about some Kubernetes-specific things to think about when dockerizing an application, and we're going to look at how to write a Helm chart to deploy an application to multiple clusters.
+In part two of this tutorial we learned how to bring up a cluster in AWS, we learned a bit about security, and we learned about how to set up an Ingress to bring traffic into our cluster.  In [part three](/2021/10/20/kubernetes-for-developers-part-3/) we're going to look at some important concepts like volumes, stateful sets, and autoscaling.
