@@ -457,4 +457,24 @@ transcoder_server_jobs_in_progress{
 
 This lets us easily grab counters from, for example, a specific pod to see if that pod is misbehaving in some way.  At a glance, adding all these extra labels would seem to be counter to the advice we just discussed - to limit the cardinality of your labels.  In practice it's not such a problem - the "pod" here has a 1:1 correspondence with the "instance", for example, so these together will only create a single series in the database.
 
+## Adding a PodMonitor
+
+Now our application has a "/metrics" endpoint - we need to let Prometheus know where to find it.  As mentioned above, this is done using a custom resource called a `PodMonitor`.  In our service's .yaml file, or somewhere in it's Helm chart if it has one, we can add a `PodMonitor`:
+
+```yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: myService
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: transcoder-server
+  podMetricsEndpoints:
+  - port: http
+    path: /metrics
+```
+
+Here the "matchLabels" tells Prometheus which pods it should be monitoring, and the `podMetricsEndpoint` tells Prometheus how to scrape metrics.  After `kubectl apply`ing this file, Prometheus should start scraping data from our application.
+
 That wraps it up for Prometheus and Grafana.  In the next part of our series we'll look into how Prometheus's "alertmanager" can be used to alert us when something is going wrong in our cluster.
