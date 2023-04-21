@@ -17,7 +17,7 @@ account.  I'll assume you have all of that setup and running.
 
 First, we head over to IFTTT and create a new recipe.  For the trigger, pick the Maker channel, and the "Receive a Web
 Request" trigger.  Set the "Event Name" to "travis_webhook".  For the action, we pick "Philips Hue", and "Change color".
-Pick which lights you want to change color, and in the "Color value or name" put "{{Value1}}" (which is going to take
+{% raw %}Pick which lights you want to change color, and in the "Color value or name" put "{{Value1}}" (which is going to take{% endraw %}
 `value1` from our POST to the Maker channel.)  This will give you a URL; keep this handy for later.
 
 ### Create Lambda Function

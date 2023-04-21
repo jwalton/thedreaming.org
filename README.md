@@ -18,5 +18,5 @@ Setup:
 
 To run the site in development mode:
 
-    jekyll serve -w
+    bundle exec jekyll serve -w
 
