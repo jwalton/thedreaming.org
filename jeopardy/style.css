@@ -1,0 +1,87 @@
+:root {
+    --background: #112989;
+}
+
+body {
+    background-color: var(--background);
+}
+
+a:link,
+a:hover,
+a:active,
+a:visited {
+    color: white;
+}
+
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 90vh;
+
+    > * {
+        margin: 5px;
+    }
+}
+
+#gameBoard {
+    border-collapse: collapse;
+    width: 90%;
+    height: 90vh;
+
+    th,
+    td {
+        border: 5px solid var(--background);
+    }
+
+    th {
+        color: black;
+        font-family: sans-serif;
+    }
+
+    th:nth-child(3n+1) {
+        background-color: #fd63fc;
+    }
+
+    th:nth-child(3n+2) {
+        background-color: #94fafe;
+    }
+
+    th:nth-child(3n) {
+        background-color: #ffd969;
+    }
+
+    td {
+        text-align: center;
+        background-color: black;
+        color: #dcb231;
+        font-size: 300%;
+        width: 16.6%;
+    }
+
+    a:link {
+        color: #dcb231;
+    }
+
+    a:hover,
+    a:active {
+        color: white;
+    }
+
+    a:visited {
+        color: black;
+    }
+
+
+}
+
+.question {
+    color: white;
+    font-size: 400%;
+}
+
+.answer {
+    color: white;
+    font-size: 400%;
+}
